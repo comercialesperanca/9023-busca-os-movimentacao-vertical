@@ -2,8 +2,8 @@ object dmdb: Tdmdb
   OldCreateOrder = False
   Height = 812
   Width = 668
-  object qryCancelarSolicitacoesAbandonadas: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryCancelarSolicitacoesAbandonadas: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'UPDATE BOFILAOS SET'
       'STATUS = '#39'C'#39
@@ -11,16 +11,16 @@ object dmdb: Tdmdb
       'AND DTSOLICITACAO <= :DTLIMITE'
       'and status in ('#39'A'#39', '#39'R'#39')')
     Left = 88
-    Top = 80
+    Top = 152
     ParamData = <
       item
         DataType = ftUnknown
         Name = 'DTLIMITE'
-        ParamType = ptUnknown
+        Value = nil
       end>
   end
-  object qryOSEmExecucao: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryOSEmExecucao: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       
         'select nvl(numos, 0) as numos, senha, nvl(codendereco,0) as code' +
@@ -33,17 +33,17 @@ object dmdb: Tdmdb
       'and tipooperador = :TIPOOPERADOR'
       'and tipoos in (58, 61, 98, 17)')
     Left = 88
-    Top = 144
+    Top = 216
     ParamData = <
       item
         DataType = ftUnknown
         Name = 'MATRICULA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'TIPOOPERADOR'
-        ParamType = ptUnknown
+        Value = nil
       end>
     object qryOSEmExecucaoNUMOS: TFloatField
       FieldName = 'NUMOS'
@@ -67,8 +67,8 @@ object dmdb: Tdmdb
       FieldName = 'FLAGSL'
     end
   end
-  object qryCancelarSenha: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryCancelarSenha: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'update bofilaos set'
       'status = '#39'C'#39
@@ -79,11 +79,11 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'SENHA'
-        ParamType = ptUnknown
+        Value = nil
       end>
   end
-  object qryRegistrarRetorno: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryRegistrarRetorno: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'UPDATE bofilaos '
       'SET    ( ruarangeinicio, ruarangefim, status, numos, '
@@ -120,16 +120,16 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'SENHAANTERIOR'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'SENHAATUAL'
-        ParamType = ptUnknown
+        Value = nil
       end>
   end
-  object qryCarregarSolicitacoes: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryCarregarSolicitacoes: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'SELECT'
       '  senha, '
@@ -147,29 +147,29 @@ object dmdb: Tdmdb
     Top = 80
     object qryCarregarSolicitacoesSENHA: TFloatField
       FieldName = 'SENHA'
-      Origin = 'BDECONNECTION.BOFILAOS.SENHA'
     end
-    object qryCarregarSolicitacoesMATRICULA: TFloatField
+    object qryCarregarSolicitacoesMATRICULA: TIntegerField
       FieldName = 'MATRICULA'
-      Origin = 'BDECONNECTION.BOFILAOS.MATRICULA'
+      Required = True
     end
-    object qryCarregarSolicitacoesRUARANGEINICIO: TFloatField
+    object qryCarregarSolicitacoesRUARANGEINICIO: TIntegerField
       FieldName = 'RUARANGEINICIO'
-      Origin = 'BDECONNECTION.BOFILAOS.RUARANGEINICIO'
+      Required = True
     end
-    object qryCarregarSolicitacoesRUARANGEFIM: TFloatField
+    object qryCarregarSolicitacoesRUARANGEFIM: TIntegerField
       FieldName = 'RUARANGEFIM'
-      Origin = 'BDECONNECTION.BOFILAOS.RUARANGEFIM'
+      Required = True
     end
     object qryCarregarSolicitacoesDTSOLICITACAO: TDateTimeField
       FieldName = 'DTSOLICITACAO'
+      Required = True
     end
     object qryCarregarSolicitacoesTIPOOPERADOR: TFloatField
       FieldName = 'TIPOOPERADOR'
     end
   end
-  object qryDadosSenhaAnterior: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryDadosSenhaAnterior: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'select '
       
@@ -197,15 +197,16 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'MATRICULA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'SENHA'
-        ParamType = ptUnknown
+        Value = nil
       end>
     object qryDadosSenhaAnteriorFLAGSL: TStringField
       FieldName = 'FLAGSL'
+      FixedChar = True
       Size = 1
     end
     object qryDadosSenhaAnteriorRUA: TFloatField
@@ -219,6 +220,7 @@ object dmdb: Tdmdb
     end
     object qryDadosSenhaAnteriorDTSOLICITACAO: TDateTimeField
       FieldName = 'DTSOLICITACAO'
+      Required = True
     end
     object qryDadosSenhaAnteriorSENHA: TFloatField
       FieldName = 'SENHA'
@@ -227,8 +229,8 @@ object dmdb: Tdmdb
       FieldName = 'DTONDA'
     end
   end
-  object qryRuasExcessoFuncionariosEmp: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryRuasExcessoFuncionariosEmp: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'select pcendereco.rua'
       'from bofilaos'
@@ -250,20 +252,19 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'MATRICULA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftString
         Name = 'MAXIMOPORRUA'
-        ParamType = ptUnknown
         Value = '10'
       end>
-    object qryRuasExcessoFuncionariosEmpRUA: TFloatField
+    object qryRuasExcessoFuncionariosEmpRUA: TIntegerField
       FieldName = 'RUA'
     end
   end
-  object qryRuasExcecao: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryRuasExcecao: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       
         '(SELECT DISTINCT TRIM(REGEXP_SUBSTR(VALOR, '#39'[^,]+'#39', 1, LEVEL)) R' +
@@ -278,16 +279,15 @@ object dmdb: Tdmdb
       item
         DataType = ftString
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
         Value = '2'
       end>
     object qryRuasExcecaoRUA: TStringField
       FieldName = 'RUA'
-      Size = 100
+      Size = 200
     end
   end
-  object qryAbastecimentoSuperLotacao: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryAbastecimentoSuperLotacao: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'select '
       '  numos,'
@@ -342,13 +342,11 @@ object dmdb: Tdmdb
       item
         DataType = ftString
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
         Value = '2'
       end
       item
         DataType = ftString
         Name = 'RUA'
-        ParamType = ptUnknown
         Value = '1'
       end>
     object qryAbastecimentoSuperLotacaoNUMOS: TFloatField
@@ -360,12 +358,9 @@ object dmdb: Tdmdb
     object qryAbastecimentoSuperLotacaoCODENDERECO: TFloatField
       FieldName = 'CODENDERECO'
     end
-    object qryAbastecimentoSuperLotacaoCODIGOUMA: TFloatField
-      FieldName = 'CODIGOUMA'
-    end
   end
-  object qryAtenderSolicitacao: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryAtenderSolicitacao: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'UPDATE bofilaos SET'
       '  STATUS = '#39'R'#39','
@@ -384,76 +379,76 @@ object dmdb: Tdmdb
       '  ARMAZEMTODO = :ARMAZEMTODO'
       'WHERE SENHA = :SENHA')
     Left = 96
-    Top = 328
+    Top = 400
     ParamData = <
       item
         DataType = ftUnknown
         Name = 'NUMOS'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CODIGOUMA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CODENDERECO'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CODENDERECOORIG'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'FLAGSL'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'TIPOSERVICO'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'DTONDA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'NRONDA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'TIPOOS'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CRITERIO'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'ARMAZEMTODO'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'SENHA'
-        ParamType = ptUnknown
+        Value = nil
       end>
   end
-  object qryAuxiliar: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryAuxiliar: TOraQuery
+    Session = OraSession1
     Left = 88
-    Top = 232
+    Top = 304
   end
-  object qryRuasExcessoOS: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryRuasExcessoOS: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'SELECT'
       '  pcendereco.rua  '
@@ -491,31 +486,31 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'MAXIMOPORRUA'
-        ParamType = ptUnknown
+        Value = nil
       end>
-    object qryRuasExcessoOSRUA: TFloatField
+    object qryRuasExcessoOSRUA: TIntegerField
       FieldName = 'RUA'
     end
   end
-  object qrySolicitacoesAbandonadas: TQuery
-    DatabaseName = 'BDEConnection'
+  object qrySolicitacoesAbandonadas: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'SELECT SENHA FROM BOFILAOS'
       'WHERE dtatribuida IS NULL'
       'AND DTSOLICITACAO <= :DTLIMITE'
       'AND STATUS in ('#39'A'#39', '#39'R'#39')')
     Left = 88
-    Top = 24
+    Top = 96
     ParamData = <
       item
         DataType = ftUnknown
         Name = 'DTLIMITE'
-        ParamType = ptUnknown
+        Value = nil
       end>
   end
   object cdsOSsAtribuidas: TClientDataSet
@@ -639,8 +634,8 @@ object dmdb: Tdmdb
     Left = 399
     Top = 288
   end
-  object qryTotalOSRuas: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryTotalOSRuas: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'SELECT '
       '  pcendereco.rua  '
@@ -670,17 +665,17 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
+        Value = nil
       end>
-    object qryTotalOSRuasRUA: TFloatField
+    object qryTotalOSRuasRUA: TIntegerField
       FieldName = 'RUA'
     end
     object qryTotalOSRuasTOTAL: TFloatField
       FieldName = 'TOTAL'
     end
   end
-  object qryTotalFuncRuas: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryTotalFuncRuas: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'select pcendereco.rua, count(bofilaos.matricula) as total'
       'from bofilaos'
@@ -693,23 +688,23 @@ object dmdb: Tdmdb
       'where bofilaos.status in ('#39'E'#39','#39'R'#39')'
       'and pcendereco.codfilial = :CODFILIAL'
       'group by pcendereco.rua')
-    Left = 263
+    Left = 271
     Top = 232
     ParamData = <
       item
         DataType = ftUnknown
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
+        Value = nil
       end>
-    object qryTotalFuncRuasRUA: TFloatField
+    object qryTotalFuncRuasRUA: TIntegerField
       FieldName = 'RUA'
     end
     object qryTotalFuncRuasTOTAL: TFloatField
       FieldName = 'TOTAL'
     end
   end
-  object qryRuasExcessoFuncionariosPalet: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryRuasExcessoFuncionariosPalet: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'select'
       '     pcendereco.rua'
@@ -730,19 +725,19 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'MATRICULA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'MAXIMOPORRUA'
-        ParamType = ptUnknown
+        Value = nil
       end>
-    object qryRuasExcessoFuncionariosPaletRUA: TFloatField
+    object qryRuasExcessoFuncionariosPaletRUA: TIntegerField
       FieldName = 'RUA'
     end
   end
-  object qryOSsMesmoEnderecoOrigem: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryOSsMesmoEnderecoOrigem: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'SELECT   pcmovendpend.NUMOS'
       'FROM     pcmovendpend '
@@ -786,34 +781,34 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'TIPOOS'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'NUMOS'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CODENDERECOORIG'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CODENDERECO'
-        ParamType = ptUnknown
+        Value = nil
       end>
     object qryOSsMesmoEnderecoOrigemNUMOS: TFloatField
       FieldName = 'NUMOS'
     end
   end
-  object qryGravarBOFILAOSR: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryGravarBOFILAOSR: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'INSERT INTO BOFILAOSR (senha, numos) VALUES (:SENHA, :NUMOS)')
     Left = 96
@@ -822,16 +817,16 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'SENHA'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'NUMOS'
-        ParamType = ptUnknown
+        Value = nil
       end>
   end
-  object qryClonarOS: TQuery
-    DatabaseName = 'BDEConnection'
+  object qryClonarOS: TOraQuery
+    Session = OraSession1
     SQL.Strings = (
       'INSERT INTO PCMOVENDPEND ('#9#9
       '        NUMOS'
@@ -1120,32 +1115,50 @@ object dmdb: Tdmdb
       item
         DataType = ftUnknown
         Name = 'NOVOTIPO'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'NUMOS'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'ANTIGOTIPO'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'CODFILIAL'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'NUMOS'
-        ParamType = ptUnknown
+        Value = nil
       end
       item
         DataType = ftUnknown
         Name = 'NOVOTIPO'
-        ParamType = ptUnknown
+        Value = nil
       end>
+  end
+  object OraSession1: TOraSession
+    Options.Direct = True
+    DataTypeMap = <
+      item
+        DBType = 106
+        FieldType = ftFloat
+      end
+      item
+        DBType = 107
+        FieldType = ftFloat
+      end>
+    Username = 'ESPERANCA'
+    Server = 'teste-scan:1521/WINT'
+    LoginPrompt = False
+    Left = 72
+    Top = 24
+    EncryptedPassword = 'ABFFBAFFACFFABFFBAFFBAFFACFFAFFFBAFFADFFBEFFB1FFBCFFBEFF'
   end
 end

@@ -23,23 +23,29 @@ object FrmInicial: TFrmInicial
     Top = 0
     Width = 890
     Height = 456
-    ActivePage = tabRobo
     Align = alClient
     TabOrder = 0
-    ClientRectBottom = 456
-    ClientRectRight = 890
-    ClientRectTop = 34
+    Properties.ActivePage = tabRobo
+    Properties.CustomButtons.Buttons = <>
+    ClientRectBottom = 453
+    ClientRectLeft = 2
+    ClientRectRight = 887
+    ClientRectTop = 37
     object tabRobo: TcxTabSheet
       Caption = 'Rob'#244
       ImageIndex = 0
+      ExplicitLeft = 4
+      ExplicitTop = 34
+      ExplicitWidth = 882
+      ExplicitHeight = 418
       DesignSize = (
-        890
-        422)
+        885
+        416)
       object btnIniciar: TcxButton
-        Left = 811
-        Top = 393
-        Width = 75
-        Height = 25
+        Left = 779
+        Top = 370
+        Width = 100
+        Height = 40
         Anchors = [akRight, akBottom]
         Caption = 'Iniciar'
         TabOrder = 0
@@ -47,19 +53,19 @@ object FrmInicial: TFrmInicial
       end
       object btnLimparLog: TcxButton
         Left = 8
-        Top = 393
+        Top = 370
         Width = 152
-        Height = 25
+        Height = 40
         Anchors = [akLeft, akBottom]
         Caption = 'Limpar Log'
         TabOrder = 1
         OnClick = btnLimparLogClick
       end
       object btnParar: TcxButton
-        Left = 730
-        Top = 393
-        Width = 75
-        Height = 25
+        Left = 673
+        Top = 370
+        Width = 100
+        Height = 40
         Anchors = [akRight, akBottom]
         Caption = 'Parar'
         Enabled = False
@@ -80,8 +86,8 @@ object FrmInicial: TFrmInicial
         Style.Font.Style = []
         Style.IsFontAssigned = True
         TabOrder = 3
-        Height = 379
-        Width = 878
+        Height = 353
+        Width = 873
       end
     end
     object tabOSAtribuidas: TcxTabSheet
@@ -91,8 +97,8 @@ object FrmInicial: TFrmInicial
       object grdOSAtrbuidas: TcxGrid
         Left = 0
         Top = 0
-        Width = 880
-        Height = 412
+        Width = 875
+        Height = 406
         Align = alClient
         Font.Charset = DEFAULT_CHARSET
         Font.Color = clWindowText
@@ -103,7 +109,7 @@ object FrmInicial: TFrmInicial
         TabOrder = 0
         object grdOSAtrbuidasDBTableView1: TcxGridDBTableView
           OnDblClick = grdOSAtrbuidasDBTableView1DblClick
-          NavigatorButtons.ConfirmDelete = False
+          Navigator.Buttons.CustomButtons = <>
           DataController.DataSource = dmdb.dsrOSsAtribuidas
           DataController.Summary.DefaultGroupSummaryItems = <>
           DataController.Summary.FooterSummaryItems = <
@@ -188,6 +194,7 @@ object FrmInicial: TFrmInicial
           object grdOSAtrbuidasDBTableView1ARMAZEMTODO: TcxGridDBColumn
             DataBinding.FieldName = 'ARMAZEMTODO'
             PropertiesClassName = 'TcxCheckBoxProperties'
+            Properties.Alignment = taRightJustify
             Properties.ValueChecked = '1'
             Properties.ValueUnchecked = '0'
             Width = 114
@@ -195,6 +202,7 @@ object FrmInicial: TFrmInicial
           object grdOSAtrbuidasDBTableView1SUPERLOTADA: TcxGridDBColumn
             DataBinding.FieldName = 'SUPERLOTADA'
             PropertiesClassName = 'TcxCheckBoxProperties'
+            Properties.Alignment = taRightJustify
             Properties.ValueChecked = '1'
             Properties.ValueUnchecked = '0'
             Width = 105
@@ -236,7 +244,13 @@ object FrmInicial: TFrmInicial
   end
   object timer: TTimer
     OnTimer = timerTimer
-    Left = 525
-    Top = 424
+    Left = 741
+    Top = 136
+  end
+  object cxLookAndFeelController1: TcxLookAndFeelController
+    NativeStyle = False
+    SkinName = 'SevenClassic'
+    Left = 716
+    Top = 74
   end
 end

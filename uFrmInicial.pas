@@ -8,7 +8,15 @@ uses
   cxButtons, ExtCtrls, cxControls, cxContainer, cxEdit, cxTextEdit, cxMemo,
   cxStyles, cxCustomData, cxFilter, cxData, cxDataStorage, DB, cxDBData,
   cxGridCustomTableView, cxGridTableView, cxGridDBTableView, cxGridLevel,
-  cxClasses, cxGridCustomView, cxGrid, DBTables, cxPC, cxCheckBox;
+  cxClasses, cxGridCustomView, cxGrid, DBAccess, Ora, OraSmart, MemDS, OraError, cxPC, cxCheckBox, dxSkinsCore, dxSkinBlack, dxSkinBlue,
+  dxSkinBlueprint, dxSkinCaramel, dxSkinCoffee, dxSkinDarkroom, dxSkinDarkSide, dxSkinDevExpressDarkStyle, dxSkinDevExpressStyle, dxSkinFoggy,
+  dxSkinGlassOceans, dxSkinHighContrast, dxSkiniMaginary, dxSkinLilian, dxSkinLiquidSky, dxSkinLondonLiquidSky, dxSkinMcSkin, dxSkinMetropolis,
+  dxSkinMetropolisDark, dxSkinMoneyTwins, dxSkinOffice2007Black, dxSkinOffice2007Blue, dxSkinOffice2007Green, dxSkinOffice2007Pink,
+  dxSkinOffice2007Silver, dxSkinOffice2010Black, dxSkinOffice2010Blue, dxSkinOffice2010Silver, dxSkinOffice2013DarkGray, dxSkinOffice2013LightGray,
+  dxSkinOffice2013White, dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinOffice2019Colorful, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic,
+  dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringtime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinTheBezier,
+  dxSkinsDefaultPainters, dxSkinValentine, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
+  dxSkinWhiteprint, dxSkinXmas2008Blue, dxBarBuiltInMenu, cxNavigator, dxDateRanges;
 
 type
   TFrmInicial = class(TForm)
@@ -49,6 +57,7 @@ type
     grdOSAtrbuidasDBTableView1RUAFINAL: TcxGridDBColumn;
     grdOSAtrbuidasDBTableView1RANGERUASEXCECAO: TcxGridDBColumn;
     grdOSAtrbuidasDBTableView1SEGUNDOSLOCALIZACAOOS: TcxGridDBColumn;
+    cxLookAndFeelController1: TcxLookAndFeelController;
     procedure grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnLimparLogClick(Sender: TObject);
@@ -64,10 +73,11 @@ type
 
 var
   FrmInicial: TFrmInicial;
-  HABILITADO : boolean;
-  EXECUTANDO : boolean;
-  SEGUNDOS_PARA_CANCELAMENTO : integer;
-  TEMPO_PADRAO_CANCELAMENTO : integer;
+  HABILITADO: boolean;
+  EXECUTANDO: boolean;
+  SEGUNDOS_PARA_CANCELAMENTO: integer;
+  TEMPO_PADRAO_CANCELAMENTO: integer;
+  QTD_INTEGRACOES_MESMA_CONEXAO: integer;
 
 implementation
 
@@ -79,11 +89,12 @@ procedure TFrmInicial.btnIniciarClick(Sender: TObject);
 begin
 
   HABILITADO := true;
-  btnParar.Enabled := True;
+  btnParar.Enabled := true;
   btnIniciar.Enabled := False;
   TEMPO_PADRAO_CANCELAMENTO := 10;
   SEGUNDOS_PARA_CANCELAMENTO := 10;
   logs := 0;
+  QTD_INTEGRACOES_MESMA_CONEXAO := 0;
 end;
 
 procedure TFrmInicial.btnLimparLogClick(Sender: TObject);
@@ -97,7 +108,7 @@ begin
 
   HABILITADO := False;
   btnParar.Enabled := False;
-  btnIniciar.Enabled := True;
+  btnIniciar.Enabled := true;
 end;
 
 procedure TFrmInicial.FormCreate(Sender: TObject);
@@ -111,8 +122,8 @@ procedure TFrmInicial.FormShow(Sender: TObject);
 begin
 
   pgcPrincipal.ActivePage := tabRobo;
-  Self.Caption :=  ParamStr(5) +  ' - Busca O.S. movimentação - versão: ' + Retorna_Versao();
-  Application.Title := ParamStr(5) +  ' - Busca O.S. movimentação';
+  Self.Caption := ParamStr(5) + ' - Busca O.S. movimentação - versão: ' + Retorna_Versao();
+  Application.Title := ParamStr(5) + ' - Busca O.S. movimentação';
 end;
 
 procedure TFrmInicial.grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
@@ -127,32 +138,43 @@ begin
   if (HABILITADO) and (not EXECUTANDO) then
   begin
 
-    abrirConexaoBDE();
+    QTD_INTEGRACOES_MESMA_CONEXAO := QTD_INTEGRACOES_MESMA_CONEXAO + 1;
 
-    EXECUTANDO := True;   
+    // Refazendo a conexão a cada 10 minutos
+    // Como cada loop é a cada segundo, então 600 segundos são 10 minutos
+    // como há o tempo de validações e etc, esse tempo de 10 minutos é aproximado
+    if QTD_INTEGRACOES_MESMA_CONEXAO >= 600 then
+    begin
+
+      ODACSessionGlobal.Connected := False;
+      ODACSessionGlobal.Close;
+
+      abrirConexaoODAC();
+      AtribuiSessionDmd(dmdb, ODACSessionGlobal);
+
+      QTD_INTEGRACOES_MESMA_CONEXAO := 0;
+    end;
+
+    EXECUTANDO := true;
 
     try
       begin
 
         processo_atual := '';
-         
+
         CancelarSolicitacoesAbandonadas('2');
         AtenderSolicitacoes('2');
       end;
-    except on E: Exception do
+    except
+      on E: Exception do
       begin
 
-        memo.Lines.Add('Erro: ' + e.Message);
+        memo.Lines.Add('Erro: ' + E.Message);
         memo.Lines.Add('Processo do erro: ' + processo_atual);
       end;
     end;
-    
 
-    BDEDatabase.Connected := False;
-    BDEDatabase.CloseDataSets;
-    BDEDatabase.Close;
-
-    EXECUTANDO := False;    
+    EXECUTANDO := False;
   end;
 
   if memo.Lines.Count >= 1000 then
