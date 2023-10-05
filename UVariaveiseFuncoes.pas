@@ -409,7 +409,7 @@ begin
     SQL.Add('                             and mep97.dtfimos is not null                            ');
     SQL.Add(' join pcest on pcest.codfilial = pcmovendpend.codfilial                               ');
     SQL.Add('           and pcest.codprod = pcmovendpend.codprod                                   ');
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
+    SQL.Add(' where pcmovendpend.data > sysdate - 3000                                               ');
     SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
     SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
     SQL.Add('     and pcmovendpend.dtestorno is null                                               ');
@@ -553,7 +553,7 @@ begin
     SQL.Add('                             and mep97.dtfimos is not null                            ');
     SQL.Add(' join pcest on pcest.codfilial = pcmovendpend.codfilial                               ');
     SQL.Add('           and pcest.codprod = pcmovendpend.codprod                                   ');
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
+    SQL.Add(' where pcmovendpend.data > sysdate - 3000                                               ');
     SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
     SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
     SQL.Add('     and pcmovendpend.dtestorno is null                                               ');
@@ -678,7 +678,7 @@ begin
     SQL.Add('                             and mep97.numtranswms = pcmovendpend.numtranswms        ');
     SQL.Add('                             and mep97.dtfimos is not null                           ');
     SQL.Add('                                                                                     ');
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
+    SQL.Add(' where pcmovendpend.data > sysdate - 3000                                               ');
     SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
     SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
     SQL.Add('     and pcmovendpend.dtestorno is null                                              ');
@@ -822,7 +822,7 @@ begin
       SQL.Add('  and mep58.posicao <> ''P''                                             ');
     end;
 
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                                      ');
+    SQL.Add(' where pcmovendpend.data > sysdate - 3000                                                      ');
     SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                                 ');
     SQL.Add('     and pcmovendpend.posicao = ''P''                                                        ');
     SQL.Add('     and pcmovendpend.dtestorno is null                                                      ');
@@ -1004,7 +1004,7 @@ begin
       SQL.Add('  and mep58.posicao <> ''P''                                             ');
     end;
 
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
+    SQL.Add(' where pcmovendpend.data > sysdate - 3000                                               ');
     SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
     SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
     SQL.Add('     and pcmovendpend.dtestorno is null                                                              ');
@@ -1234,7 +1234,7 @@ begin
       // sql.Add('  and mep23.posicao <> ''P''                                             ');
     end;
 
-    SQL.Add('  where pcmovendpend.data > sysdate - 30                                                                                                    ');
+    SQL.Add('  where pcmovendpend.data > sysdate - 3000                                                                                                    ');
     SQL.Add('      and pcmovendpend.codfilial = :CODFILIAL                                                                                               ');
     SQL.Add('      and pcmovendpend.posicao = ''P''                                                                                                      ');
     SQL.Add('      and pcmovendpend.dtestorno is null                                                                                                    ');
@@ -1746,7 +1746,7 @@ begin
       SQL.Add('  and mep58.posicao <> ''P''                                             ');
     end;
 
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
+    SQL.Add(' where pcmovendpend.data > sysdate - 3000                                               ');
     SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
     SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
     SQL.Add('     and bodefineondai.numtranswms is null                                              ');
@@ -1901,7 +1901,7 @@ begin
 
     SQL.Add('                                                                                                            ');
     SQL.Add('                                                                                                            ');
-    SQL.Add('   where mep.data >= trunc(sysdate - 30)                                                                    ');
+    SQL.Add('   where mep.data >= trunc(sysdate - 3000)                                                                    ');
     SQL.Add('   and mep.codfilial = :CODFILIAL                                                                           ');
     SQL.Add('   and mep.posicao = ''P''                                                                                  ');
     SQL.Add('   and mep.dtestorno is null                                                                                ');
@@ -2097,6 +2097,13 @@ begin
 
     ExecSQL;
   end;
+
+//  if (dmdb.cdsOSsAtribuidas.State <> dsBrowse) then
+//  begin
+//
+//
+//  end;
+
 
   dmdb.cdsOSsAtribuidas.Insert;
   dmdb.cdsOSsAtribuidasSENHA.AsFloat := aFiltro.Senha;

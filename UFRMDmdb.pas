@@ -3,7 +3,7 @@ unit UFRMDmdb;
 interface
 
 uses
-  SysUtils, Classes, DB, Ora, OraSmart, MemDS, OraError, DBClient, DBAccess, OraCall;
+  SysUtils, Classes, DB, Ora, OraSmart, MemDS, OraError, DBClient, DBAccess, OraCall, MidasLib;
 
 type
   Tdmdb = class(TDataModule)

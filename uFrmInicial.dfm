@@ -34,10 +34,6 @@ object FrmInicial: TFrmInicial
     object tabRobo: TcxTabSheet
       Caption = 'Rob'#244
       ImageIndex = 0
-      ExplicitLeft = 4
-      ExplicitTop = 34
-      ExplicitWidth = 882
-      ExplicitHeight = 418
       DesignSize = (
         885
         416)
@@ -249,6 +245,7 @@ object FrmInicial: TFrmInicial
   end
   object cxLookAndFeelController1: TcxLookAndFeelController
     NativeStyle = False
+    ScrollbarMode = sbmClassic
     SkinName = 'SevenClassic'
     Left = 716
     Top = 74
