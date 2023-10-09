@@ -58,6 +58,7 @@ type
     grdOSAtrbuidasDBTableView1RANGERUASEXCECAO: TcxGridDBColumn;
     grdOSAtrbuidasDBTableView1SEGUNDOSLOCALIZACAOOS: TcxGridDBColumn;
     cxLookAndFeelController1: TcxLookAndFeelController;
+    chkExibirMensagensLog: TcxCheckBox;
     procedure grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnLimparLogClick(Sender: TObject);
@@ -95,6 +96,7 @@ begin
   SEGUNDOS_PARA_CANCELAMENTO := 10;
   logs := 0;
   QTD_INTEGRACOES_MESMA_CONEXAO := 0;
+  chkExibirMensagensLog.Enabled := False;
 end;
 
 procedure TFrmInicial.btnLimparLogClick(Sender: TObject);
@@ -109,6 +111,7 @@ begin
   HABILITADO := False;
   btnParar.Enabled := False;
   btnIniciar.Enabled := true;
+  chkExibirMensagensLog.Enabled := true;
 end;
 
 procedure TFrmInicial.FormCreate(Sender: TObject);

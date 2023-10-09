@@ -35,6 +35,12 @@ uses UFRMDmdb, ULibrary, DB, DBAccess, Ora, OraSmart, MemDS, OraError, uFrmInici
 procedure Log(aMensagem: string);
 begin
 
+  if not FrmInicial.chkExibirMensagensLog.Checked then
+  begin
+
+    Exit;
+  end;
+
   logs := logs + 1;
   processo_atual := aMensagem;
   // FrmInicial.memo.Lines.Add( IntToStr(FrmInicial.memo.Lines.Count + 1) + ') ' + DateTimeToStr(Now) + ': ' + aMensagem);
@@ -115,7 +121,7 @@ begin
     begin
 
       SQL.Add(' join bodefineondai ON bodefineondai.numtranswms = pcmovendpend.numtranswms ');
-//      SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
+      // SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
     end;
 
     SQL.Add(' WHERE    pcmovendpend.posicao = ''P''                                          ');
@@ -806,7 +812,7 @@ begin
     SQL.Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig               ');
     SQL.Add(' left join bopendenciaconf on bopendenciaconf.numos = pcmovendpend.numos                     ');
     SQL.Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms           ');
-//    SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
+    // SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                   ');
     SQL.Add('     and booscompendencia.dataliberacao is null                                              ');
 
@@ -988,7 +994,7 @@ begin
     SQL.Add(' from pcmovendpend                                                                                   ');
     SQL.Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig                       ');
     SQL.Add(' join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                        ');
-//    SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
+    // SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos            ');
     SQL.Add('     and booscompendencia.dataliberacao is null                                       ');
 
@@ -1216,7 +1222,7 @@ begin
     SQL.Add('    from pcmovendpend                                                                                                                       ');
     SQL.Add('    join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco                                                               ');
     SQL.Add('    left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                                                       ');
-//    SQL.Add('               AND bodefineondai.numcar = pcmovendpend.numcar ');
+    // SQL.Add('               AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add('    left join carregamentos on carregamentos.numcar = pcmovendpend.numcar                                                                   ');
     SQL.Add('    left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                                                               ');
     SQL.Add('        and booscompendencia.dataliberacao is null                                                                                          ');
@@ -1506,7 +1512,7 @@ begin
     SQL.Add('     , bodefineondai.numordem                                                                                        ');
     SQL.Add('   from pcmovendpend                                                                                                 ');
     SQL.Add('   join bodefineondai  on bodefineondai.numtranswms = pcmovendpend.numtranswms                                       ');
-//    SQL.Add('                       AND bodefineondai.numcar = pcmovendpend.numcar ');
+    // SQL.Add('                       AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add('                       and bodefineondai.data >= pcmovendpend.data                                                   ');
     SQL.Add('   where pcmovendpend.data >= trunc(sysdate - 10)                                                                    ');
     SQL.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                           ');
@@ -1728,7 +1734,7 @@ begin
     SQL.Add(' from pcmovendpend                                                                      ');
     SQL.Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig          ');
     SQL.Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms      ');
-//    SQL.Add('                         AND bodefineondai.numcar = pcmovendpend.numcar ');
+    // SQL.Add('                         AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add(' join pcest on pcest.codfilial = pcmovendpend.codfilial                                 ');
     SQL.Add('     and pcest.codprod = pcmovendpend.codprod                                           ');
     SQL.Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos            ');
@@ -2098,12 +2104,11 @@ begin
     ExecSQL;
   end;
 
-//  if (dmdb.cdsOSsAtribuidas.State <> dsBrowse) then
-//  begin
-//
-//
-//  end;
-
+  // if (dmdb.cdsOSsAtribuidas.State <> dsBrowse) then
+  // begin
+  //
+  //
+  // end;
 
   dmdb.cdsOSsAtribuidas.Insert;
   dmdb.cdsOSsAtribuidasSENHA.AsFloat := aFiltro.Senha;

@@ -82,8 +82,16 @@ object FrmInicial: TFrmInicial
         Style.Font.Style = []
         Style.IsFontAssigned = True
         TabOrder = 3
-        Height = 353
+        Height = 305
         Width = 873
+      end
+      object chkExibirMensagensLog: TcxCheckBox
+        Left = 8
+        Top = 319
+        Caption = 'Exibir mensagens log'
+        State = cbsChecked
+        TabOrder = 4
+        Transparent = True
       end
     end
     object tabOSAtribuidas: TcxTabSheet
