@@ -141,6 +141,8 @@ begin
   if (HABILITADO) and (not EXECUTANDO) then
   begin
 
+    Application.ProcessMessages;
+
     QTD_INTEGRACOES_MESMA_CONEXAO := QTD_INTEGRACOES_MESMA_CONEXAO + 1;
 
     // Refazendo a conexão a cada 10 minutos

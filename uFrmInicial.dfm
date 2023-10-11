@@ -25,7 +25,7 @@ object FrmInicial: TFrmInicial
     Height = 456
     Align = alClient
     TabOrder = 0
-    Properties.ActivePage = tabRobo
+    Properties.ActivePage = tabOSAtribuidas
     Properties.CustomButtons.Buttons = <>
     ClientRectBottom = 453
     ClientRectLeft = 2

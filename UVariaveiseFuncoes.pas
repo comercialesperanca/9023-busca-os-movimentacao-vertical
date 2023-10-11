@@ -1377,324 +1377,320 @@ begin
   Result := False;
   tempo := Now;
 
-  with dmdb.qryAuxiliar do
-  begin
-    Close;
-    SQL.Clear;
+  ODACSessionGlobal.StartTransaction();
 
-    { SQL.Add(' select                                                                                                      ');
-      SQL.Add('   numos,                                                                                                    ');
-      SQL.Add('   rua,                                                                                                      ');
-      SQL.Add('   codendereco,                                                                                              ');
-      SQL.Add('   codigouma,                                                                                                ');
-      SQL.Add('   codenderecoorig,                                                                                          ');
-      SQL.Add('   tipoos,                                                                                                   ');
-      SQL.Add('   dataonda,                                                                                                 ');
-      SQL.Add('   numonda                                                                                                   ');
-      SQL.Add(' from (                                                                                                      ');
-      SQL.Add('                                                                                                             ');
-      SQL.Add(' with sep_pendentes as                                                                                       ');
-      SQL.Add(' (                                                                                                           ');
-      SQL.Add('   select                                                                                                    ');
-      SQL.Add('     pcmovendpend.codendereco                                                                                ');
-      SQL.Add('     , bodefineondai.data as dataonda                                                                        ');
-      SQL.Add('     , bodefineondai.numonda                                                                                 ');
-      SQL.Add('     , bodefineondai.numordem                                                                                ');
-      SQL.Add('   from pcmovendpend                                                                                         ');
-      SQL.Add('   join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                              ');
-      SQL.Add('   where pcmovendpend.data >= trunc(sysdate - 15)                                                            ');
-      SQL.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                   ');
-      SQL.Add('   and pcmovendpend.posicao = ''P''                                                                          ');
-      SQL.Add('   and pcmovendpend.dtestorno is null                                                                        ');
-      SQL.Add('   and pcmovendpend.codfuncos is null                                                                        ');
-      SQL.Add('   and pcmovendpend.tipoos in (10, 22)                                                                       ');
-      SQL.Add('   group by   bodefineondai.data                                                                             ');
-      SQL.Add('     , bodefineondai.numonda                                                                                 ');
-      SQL.Add('     , bodefineondai.numordem                                                                                ');
-      SQL.Add('     , pcmovendpend.codendereco                                                                              ');
-      SQL.Add('   order by bodefineondai.data                                                                               ');
-      SQL.Add('     , bodefineondai.numonda                                                                                 ');
-      SQL.Add('     , bodefineondai.numordem                                                                                ');
-      SQL.Add(' )                                                                                                           ');
-      SQL.Add('                                                                                                             ');
-      SQL.Add('   select                                                                                                    ');
-      SQL.Add('     mep.numos                                                                                               ');
-      SQL.Add('     , pcendereco.rua                                                                                        ');
-      SQL.Add('     , pcendereco.codendereco                                                                                ');
-      SQL.Add('     , mep.codigouma                                                                                         ');
-      SQL.Add('     , mep.codenderecoorig                                                                                   ');
-      SQL.Add('     , mep.tipoos                                                                                            ');
-      SQL.Add('     , sep_pendentes.dataonda                                                                                ');
-      SQL.Add('     , sep_pendentes.numonda                                                                                 ');
-      SQL.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                        ');
-      SQL.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range    ');
-      SQL.Add('   from pcmovendpend mep                                                                                     ');
-      SQL.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                    ');
-      SQL.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                               ');
-      SQL.Add('   join sep_pendentes on sep_pendentes.codendereco = mep.codendereco                                         ');
+  try
+    begin
 
-      if aFiltro.TipoOperador = tpPaleteiro then
+      with dmdb.qryAuxiliar do
       begin
+        Close;
+        SQL.Clear;
 
-      sql.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
-      sql.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
-      sql.Add('  and mep58.codfilial = mep.codfilial                           ');
-      sql.Add('  and mep58.numtranswms = mep.numtranswms                       ');
-      sql.Add('  and mep58.codigouma = mep.codigouma                           ');
-      sql.Add('  and mep58.tipoos = 58                                         ');
-      sql.Add('  and mep58.posicao <> ''P''                                    ');
-      end;
+        SQL.Add(' with sep_pendentes as                                                                                    ');
+        SQL.Add(' (                                                                                                        ');
+        SQL.Add('    select                                                                                                ');
+        SQL.Add('     pcmovendpend.codendereco                                                                             ');
+        SQL.Add('     , bodefineondai.data as dataonda                                                                     ');
+        SQL.Add('     , bodefineondai.numonda                                                                              ');
+        SQL.Add('     , bodefineondai.numordem                                                                             ');
+        SQL.Add('   from pcmovendpend                                                                                      ');
+        SQL.Add('   join bodefineondai  on bodefineondai.numtranswms = pcmovendpend.numtranswms                            ');
+        SQL.Add('                       and bodefineondai.data >= pcmovendpend.data                                        ');
+        SQL.Add('   where pcmovendpend.data >= trunc(sysdate - 10)                                                         ');
+        SQL.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                ');
+        SQL.Add('   and pcmovendpend.posicao = ''P''                                                                       ');
+        SQL.Add('   and pcmovendpend.dtestorno is null                                                                     ');
+        SQL.Add('   and pcmovendpend.codfuncos is null                                                                     ');
+        SQL.Add('   and pcmovendpend.tipoos in (10, 22)                                                                    ');
+        SQL.Add(' ),                                                                                                       ');
+        SQL.Add(' fila_execucao as (                                                                                       ');
+        SQL.Add('   select bofilaos.numos                                                                                  ');
+        SQL.Add('   FROM bofilaos                                                                                          ');
+        SQL.Add('   where bofilaos.status in (''E'',''R'')                                                                 ');
+        SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                      ');
+        SQL.Add('                                                                                                          ');
+        SQL.Add('   union all                                                                                              ');
+        SQL.Add('                                                                                                          ');
+        SQL.Add('   select bofilaosR.numos                                                                                 ');
+        SQL.Add('   FROM bofilaosR                                                                                         ');
+        SQL.Add('   join bofilaos on bofilaosR.senha = bofilaos.senha                                                      ');
+        SQL.Add('   where  bofilaos.status in (''E'',''R'')                                                                ');
+        SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                      ');
+        SQL.Add(' ),                                                                                                       ');
+        SQL.Add('                                                                                                          ');
+        SQL.Add(' pendencias as (                                                                                          ');
+        SQL.Add('   select pend.numos                                                                                      ');
+        SQL.Add('   from booscompendencia pend                                                                             ');
+        SQL.Add('   where pend.datainclusao >= trunc(sysdate -  10)                                                        ');
+        SQL.Add('   and pend.dataliberacao is null                                                                         ');
+        SQL.Add(' )                                                                                                        ');
+        SQL.Add('                                                                                                          ');
+        SQL.Add('   select                                                                                                 ');
+        SQL.Add('     mep.numos                                                                                            ');
+        SQL.Add('     , pcendereco.rua                                                                                     ');
+        SQL.Add('     , pcendereco.codendereco                                                                             ');
+        SQL.Add('     , mep.codigouma                                                                                      ');
+        SQL.Add('     , mep.codenderecoorig                                                                                ');
+        SQL.Add('     , mep.tipoos                                                                                         ');
+        SQL.Add('     , sep_pendentes.dataonda                                                                             ');
+        SQL.Add('     , sep_pendentes.numonda                                                                              ');
+        SQL.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                     ');
+        SQL.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range ');
+        SQL.Add('   from pcmovendpend mep                                                                                  ');
+        SQL.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                 ');
+        SQL.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                            ');
+        SQL.Add('   join sep_pendentes on sep_pendentes.codendereco = mep.codendereco                                      ');
 
-      SQL.Add('   where mep.data >= trunc(sysdate - 15)                                                                     ');
-      SQL.Add('   and mep.codfilial = :CODFILIAL                                                                            ');
-      SQL.Add('   and mep.posicao = ''P''                                                                                   ');
-      SQL.Add('   and mep.dtestorno is null                                                                                 ');
-      SQL.Add('   and mep.codfuncos is null                                                                                 ');
-      SQL.Add('   and mep.tipoos = :TIPOOS                                                                                  ');
-      SQL.Add('   and pcwms.numtranswms is null                                                                             ');
-      SQL.Add('   and not exists (select bofilaos.numos                                                                     ');
-      SQL.Add('         FROM bofilaos where bofilaos.numos = mep.numos                                                      ');
-      SQL.Add('         and bofilaos.status in (''E'',''R'')                                                                ');
-      SQL.Add('         and bofilaos.dtsolicitacao >= trunc(sysdate - 15))                                                  ');
-      SQL.Add('                                                                                                             ');
-      SQL.Add('   and not exists (select bofilaosR.numos                                                                    ');
-      SQL.Add('                     FROM bofilaosR                                                                          ');
-      SQL.Add('                     join bofilaos                                                                           ');
-      SQL.Add('                       on bofilaosR.senha = bofilaos.senha                                                   ');
-      SQL.Add('                     where bofilaosR.numos = mep.numos                                                       ');
-      SQL.Add('                     and bofilaos.status in (''E'',''R''))                                                   ');
-      SQL.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                      ');
-      SQL.Add('                                                                                                             ');
-
-      SQL.Add(' and not exists (select pend.numos from booscompendencia pend                                                ');
-      SQL.Add('                 join pcmovendpend on pcmovendpend.numos = pend.numos                                        ');
-      SQL.Add('                 where pend.dataliberacao is null                                                            ');
-      SQL.Add('                 and pcmovendpend.data >= trunc(sysdate - 15)                                                ');
-      SQL.Add('                 and pcmovendpend.codprod = mep.codprod )                                                    ');
-
-
-      SQL.Add('  and mep.codrotina = 1723                                                                                  ');
-
-      SQL.Add('   group by mep.numos                                                                                        ');
-      SQL.Add('     , pcendereco.rua                                                                                        ');
-      SQL.Add('     , pcendereco.codendereco                                                                                ');
-      SQL.Add('     , mep.codigouma                                                                                         ');
-      SQL.Add('     , mep.codenderecoorig                                                                                   ');
-      SQL.Add('     , mep.tipoos                                                                                            ');
-      SQL.Add('     , sep_pendentes.dataonda                                                                                ');
-      SQL.Add('     , sep_pendentes.numonda                                                                                 ');
-      SQL.Add('                                                                                                             ');
-      SQL.Add('   order by sep_pendentes.dataonda                                                                           ');
-      SQL.Add('     , sep_pendentes.numonda                                                                                 ');
-      SQL.Add('     , ordem_rua_anterior                                                                                    ');
-      SQL.Add('     , ordem_range                                                                                           ');
-      SQL.Add(' ) where rownum = 1                                                                                          ');
-
-    }
-
-    SQL.Add(' select                                                                                                              ');
-    SQL.Add('   numos,                                                                                                            ');
-    SQL.Add('   rua,                                                                                                              ');
-    SQL.Add('   codendereco,                                                                                                      ');
-    SQL.Add('   codigouma,                                                                                                        ');
-    SQL.Add('   codenderecoorig,                                                                                                  ');
-    SQL.Add('   tipoos,                                                                                                           ');
-    SQL.Add('   dataonda,                                                                                                         ');
-    SQL.Add('   numonda                                                                                                           ');
-    SQL.Add(' from (                                                                                                              ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add(' with sep_pendentes as                                                                                               ');
-    SQL.Add(' (                                                                                                                   ');
-    SQL.Add('    select                                                                                                           ');
-    SQL.Add('     pcmovendpend.codendereco                                                                                        ');
-    SQL.Add('     , bodefineondai.data as dataonda                                                                                ');
-    SQL.Add('     , bodefineondai.numonda                                                                                         ');
-    SQL.Add('     , bodefineondai.numordem                                                                                        ');
-    SQL.Add('   from pcmovendpend                                                                                                 ');
-    SQL.Add('   join bodefineondai  on bodefineondai.numtranswms = pcmovendpend.numtranswms                                       ');
-    // SQL.Add('                       AND bodefineondai.numcar = pcmovendpend.numcar ');
-    SQL.Add('                       and bodefineondai.data >= pcmovendpend.data                                                   ');
-    SQL.Add('   where pcmovendpend.data >= trunc(sysdate - 10)                                                                    ');
-    SQL.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                           ');
-    SQL.Add('   and pcmovendpend.posicao = ''P''                                                                                  ');
-    SQL.Add('   and pcmovendpend.dtestorno is null                                                                                ');
-    SQL.Add('   and pcmovendpend.codfuncos is null                                                                                ');
-    SQL.Add('   and pcmovendpend.tipoos in (10, 22)                                                                               ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('   group by   bodefineondai.data                                                                                     ');
-    SQL.Add('     , bodefineondai.numonda                                                                                         ');
-    SQL.Add('     , bodefineondai.numordem                                                                                        ');
-    SQL.Add('     , pcmovendpend.codendereco                                                                                      ');
-    SQL.Add('   order by bodefineondai.data                                                                                       ');
-    SQL.Add('     , bodefineondai.numonda                                                                                         ');
-    SQL.Add('     , bodefineondai.numordem                                                                                        ');
-    SQL.Add(' ),                                                                                                                  ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add(' fila_execucao as (                                                                                                  ');
-    SQL.Add('   select bofilaos.numos                                                                                             ');
-    SQL.Add('   FROM bofilaos                                                                                                     ');
-    SQL.Add('   where bofilaos.status in (''E'',''R'')                                                                            ');
-    SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                                 ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('   union all                                                                                                         ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('   select bofilaosR.numos                                                                                            ');
-    SQL.Add('   FROM bofilaosR                                                                                                    ');
-    SQL.Add('   join bofilaos on bofilaosR.senha = bofilaos.senha                                                                 ');
-    SQL.Add('   where  bofilaos.status in (''E'',''R'')                                                                           ');
-    SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                                 ');
-    SQL.Add(' ),                                                                                                                  ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add(' pendencias as (                                                                                                     ');
-    SQL.Add('   select pend.numos                                                                                                 ');
-    SQL.Add('   from booscompendencia pend                                                                                        ');
-    SQL.Add('   where pend.datainclusao >= trunc(sysdate -  10)                                                                   ');
-    SQL.Add('   and pend.dataliberacao is null                                                                                    ');
-    SQL.Add(' )                                                                                                                   ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('   select                                                                                                            ');
-    SQL.Add('     mep.numos                                                                                                       ');
-    SQL.Add('     , pcendereco.rua                                                                                                ');
-    SQL.Add('     , pcendereco.codendereco                                                                                        ');
-    SQL.Add('     , mep.codigouma                                                                                                 ');
-    SQL.Add('     , mep.codenderecoorig                                                                                           ');
-    SQL.Add('     , mep.tipoos                                                                                                    ');
-    SQL.Add('     , sep_pendentes.dataonda                                                                                        ');
-    SQL.Add('     , sep_pendentes.numonda                                                                                         ');
-    SQL.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                                ');
-    SQL.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range            ');
-    SQL.Add('   from pcmovendpend mep                                                                                             ');
-    SQL.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                            ');
-    SQL.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                                       ');
-    SQL.Add('   join sep_pendentes on sep_pendentes.codendereco = mep.codendereco                                                 ');
-    SQL.Add('   left join fila_execucao on fila_execucao.numos = mep.numos                                                        ');
-    SQL.Add('   left join pendencias on pendencias.numos = mep.numos                                                              ');
-
-    if aFiltro.TipoOperador = tpPaleteiro then
-    begin
-
-      SQL.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
-      SQL.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
-      SQL.Add('  and mep58.codfilial = mep.codfilial                           ');
-      SQL.Add('  and mep58.numtranswms = mep.numtranswms                       ');
-      SQL.Add('  and mep58.codigouma = mep.codigouma                           ');
-      SQL.Add('  and mep58.tipoos = 58                                         ');
-      SQL.Add('  and mep58.posicao <> ''P''                                    ');
-    end;
-
-    SQL.Add('   where mep.data >= trunc(sysdate - 15)                                                                             ');
-    SQL.Add('   and mep.codfilial = :CODFILIAL                                                                                    ');
-    SQL.Add('   and mep.posicao = ''P''                                                                                           ');
-    SQL.Add('   and mep.dtestorno is null                                                                                         ');
-    SQL.Add('   and mep.codfuncos is null                                                                                         ');
-    SQL.Add('   and mep.tipoos = :TIPOOS                                                                                          ');
-    SQL.Add('   and pcwms.numtranswms is null                                                                                     ');
-    SQL.Add('   and fila_execucao.numos is null                                                                                   ');
-    SQL.Add('   and pendencias.numos is null                                                                                      ');
-    SQL.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                              ');
-    SQL.Add('   AND NVL(mep.CODROTINA, 0) NOT IN (1709, 1721)                                                                     ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('  and mep.codrotina = 1723                                                                                           ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('   group by mep.numos                                                                                                ');
-    SQL.Add('     , pcendereco.rua                                                                                                ');
-    SQL.Add('     , pcendereco.codendereco                                                                                        ');
-    SQL.Add('     , mep.codigouma                                                                                                 ');
-    SQL.Add('     , mep.codenderecoorig                                                                                           ');
-    SQL.Add('     , mep.tipoos                                                                                                    ');
-    SQL.Add('     , sep_pendentes.dataonda                                                                                        ');
-    SQL.Add('     , sep_pendentes.numonda                                                                                         ');
-    SQL.Add('                                                                                                                     ');
-    SQL.Add('   order by sep_pendentes.dataonda                                                                                   ');
-    SQL.Add('     , sep_pendentes.numonda                                                                                         ');
-    SQL.Add('     , ordem_rua_anterior                                                                                            ');
-    SQL.Add('     , ordem_range                                                                                                   ');
-    SQL.Add(' ) where rownum = 1                                                                                                  ');
-
-    // Padrão tpEmpilhador
-    tipo_os := 58;
-
-    if aFiltro.TipoOperador = tpPaleteiro then
-    begin
-
-      tipo_os := 61;
-    end;
-
-    ParamByName('CODFILIAL').AsString := aFiltro.Filial;
-    ParamByName('RUAINICIAL').AsFloat := aFiltro.RuaInicial;
-    ParamByName('RUAFINAL').AsFloat := aFiltro.RuaFinal;
-    ParamByName('RUAANTERIOR').AsFloat := aFiltro.RuaAnterior;
-    ParamByName('TIPOOS').AsFloat := tipo_os;
-
-    Open();
-
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 8.2' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
-    aProximaOS.AnalisesCriterios.Add('TIPOOS: AP');
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
-
-    rua_encontrada := FieldByName('RUA').AsFloat;
-
-    if (not aFiltro.BuscarNoArmazemTodo) and ((rua_encontrada < aFiltro.RuaInicial) or (rua_encontrada > aFiltro.RuaFinal)) then
-    begin
-
-      Close();
-      Result := False;
-      Exit;
-    end;
-
-    if (dmdb.qryAuxiliar.RecordCount > 0) then
-    begin
-
-      aProximaOS.NumeroOS := FieldByName('NUMOS').AsFloat;
-      aProximaOS.NumeroOnda := FieldByName('NUMONDA').AsFloat;
-      aProximaOS.CodigoEndereco := FieldByName('CODENDERECO').AsFloat;
-      aProximaOS.CodigoEnderecoOrigem := FieldByName('CODENDERECOORIG').AsFloat;
-      aProximaOS.TipoServico := 'AP';
-      aProximaOS.Rua := FieldByName('RUA').AsFloat;
-      aProximaOS.NumeroUMA := FieldByName('CODIGOUMA').AsFloat;
-      aProximaOS.TipoOS := FieldByName('TIPOOS').AsFloat;
-      aProximaOS.CriterioUtilizado := 8.2;
-
-      if (not FieldByName('DATAONDA').IsNull) and (FieldByName('DATAONDA').AsString <> '') then
-      begin
-
-        aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
-      end;
-
-      // processando abastecimento consolidado
-      if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
-        aFiltro.Filial, True) then
-      begin
-
-        aProximaOS.NumeroOS := 0;
-        aProximaOS.TipoServico := 'OC';
-
-        if not GravarOSsAbastecimentoConsolidado(aFiltro.Senha, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
-          aFiltro.Filial, True) then
+        if aFiltro.TipoOperador = tpPaleteiro then
         begin
 
+          SQL.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
+          SQL.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
+          SQL.Add('  and mep58.codfilial = mep.codfilial                           ');
+          SQL.Add('  and mep58.numtranswms = mep.numtranswms                       ');
+          SQL.Add('  and mep58.codigouma = mep.codigouma                           ');
+          SQL.Add('  and mep58.tipoos = 58                                         ');
+          SQL.Add('  and mep58.posicao <> ''P''                                    ');
+        end;
+
+        SQL.Add('   where mep.data >= trunc(sysdate - 15)                                                                  ');
+        SQL.Add('   and mep.codfilial = :CODFILIAL                                                                         ');
+        SQL.Add('   and mep.posicao = ''P''                                                                                ');
+        SQL.Add('   and mep.dtestorno is null                                                                              ');
+        SQL.Add('   and mep.codfuncos is null                                                                              ');
+        SQL.Add('   and mep.tipoos = :TIPOOS                                                                               ');
+        SQL.Add('   and pcwms.numtranswms is NULL                                                                          ');
+        SQL.Add('   AND NOT EXISTS (SELECT 1 FROM fila_execucao WHERE fila_execucao.NUMOS = mep.numos)                     ');
+        SQL.Add('   AND NOT EXISTS (SELECT 1 FROM pendencias WHERE pendencias.NUMOS = mep.numos)                           ');
+        SQL.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                   ');
+        SQL.Add('   AND NVL(mep.CODROTINA, 0) NOT IN (1709, 1721)                                                          ');
+        SQL.Add('   and mep.codrotina = 1723                                                                               ');
+        SQL.Add('   order by sep_pendentes.dataonda                                                                        ');
+        SQL.Add('     , sep_pendentes.numonda                                                                              ');
+        SQL.Add('     , ordem_rua_anterior                                                                                 ');
+        SQL.Add('     , ordem_range                                                                                        ');
+        SQL.Add('   FOR UPDATE SKIP LOCKED                                                                                 ');
+
+
+        // Trecho comentado para teste com for update skip locked
+        // SQL.Add(' select                                                                                                              ');
+        // SQL.Add('   numos,                                                                                                            ');
+        // SQL.Add('   rua,                                                                                                              ');
+        // SQL.Add('   codendereco,                                                                                                      ');
+        // SQL.Add('   codigouma,                                                                                                        ');
+        // SQL.Add('   codenderecoorig,                                                                                                  ');
+        // SQL.Add('   tipoos,                                                                                                           ');
+        // SQL.Add('   dataonda,                                                                                                         ');
+        // SQL.Add('   numonda                                                                                                           ');
+        // SQL.Add(' from (                                                                                                              ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add(' with sep_pendentes as                                                                                               ');
+        // SQL.Add(' (                                                                                                                   ');
+        // SQL.Add('    select                                                                                                           ');
+        // SQL.Add('     pcmovendpend.codendereco                                                                                        ');
+        // SQL.Add('     , bodefineondai.data as dataonda                                                                                ');
+        // SQL.Add('     , bodefineondai.numonda                                                                                         ');
+        // SQL.Add('     , bodefineondai.numordem                                                                                        ');
+        // SQL.Add('   from pcmovendpend                                                                                                 ');
+        // SQL.Add('   join bodefineondai  on bodefineondai.numtranswms = pcmovendpend.numtranswms                                       ');
+        // SQL.Add('                       and bodefineondai.data >= pcmovendpend.data                                                   ');
+        // SQL.Add('   where pcmovendpend.data >= trunc(sysdate - 10)                                                                    ');
+        // SQL.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                           ');
+        // SQL.Add('   and pcmovendpend.posicao = ''P''                                                                                  ');
+        // SQL.Add('   and pcmovendpend.dtestorno is null                                                                                ');
+        // SQL.Add('   and pcmovendpend.codfuncos is null                                                                                ');
+        // SQL.Add('   and pcmovendpend.tipoos in (10, 22)                                                                               ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('   group by   bodefineondai.data                                                                                     ');
+        // SQL.Add('     , bodefineondai.numonda                                                                                         ');
+        // SQL.Add('     , bodefineondai.numordem                                                                                        ');
+        // SQL.Add('     , pcmovendpend.codendereco                                                                                      ');
+        // SQL.Add('   order by bodefineondai.data                                                                                       ');
+        // SQL.Add('     , bodefineondai.numonda                                                                                         ');
+        // SQL.Add('     , bodefineondai.numordem                                                                                        ');
+        // SQL.Add(' ),                                                                                                                  ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add(' fila_execucao as (                                                                                                  ');
+        // SQL.Add('   select bofilaos.numos                                                                                             ');
+        // SQL.Add('   FROM bofilaos                                                                                                     ');
+        // SQL.Add('   where bofilaos.status in (''E'',''R'')                                                                            ');
+        // SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                                 ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('   union all                                                                                                         ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('   select bofilaosR.numos                                                                                            ');
+        // SQL.Add('   FROM bofilaosR                                                                                                    ');
+        // SQL.Add('   join bofilaos on bofilaosR.senha = bofilaos.senha                                                                 ');
+        // SQL.Add('   where  bofilaos.status in (''E'',''R'')                                                                           ');
+        // SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                                 ');
+        // SQL.Add(' ),                                                                                                                  ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add(' pendencias as (                                                                                                     ');
+        // SQL.Add('   select pend.numos                                                                                                 ');
+        // SQL.Add('   from booscompendencia pend                                                                                        ');
+        // SQL.Add('   where pend.datainclusao >= trunc(sysdate -  10)                                                                   ');
+        // SQL.Add('   and pend.dataliberacao is null                                                                                    ');
+        // SQL.Add(' )                                                                                                                   ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('   select                                                                                                            ');
+        // SQL.Add('     mep.numos                                                                                                       ');
+        // SQL.Add('     , pcendereco.rua                                                                                                ');
+        // SQL.Add('     , pcendereco.codendereco                                                                                        ');
+        // SQL.Add('     , mep.codigouma                                                                                                 ');
+        // SQL.Add('     , mep.codenderecoorig                                                                                           ');
+        // SQL.Add('     , mep.tipoos                                                                                                    ');
+        // SQL.Add('     , sep_pendentes.dataonda                                                                                        ');
+        // SQL.Add('     , sep_pendentes.numonda                                                                                         ');
+        // SQL.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                                ');
+        // SQL.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range            ');
+        // SQL.Add('   from pcmovendpend mep                                                                                             ');
+        // SQL.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                            ');
+        // SQL.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                                       ');
+        // SQL.Add('   join sep_pendentes on sep_pendentes.codendereco = mep.codendereco                                                 ');
+        // SQL.Add('   left join fila_execucao on fila_execucao.numos = mep.numos                                                        ');
+        // SQL.Add('   left join pendencias on pendencias.numos = mep.numos                                                              ');
+        //
+        // if aFiltro.TipoOperador = tpPaleteiro then
+        // begin
+        //
+        // SQL.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
+        // SQL.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
+        // SQL.Add('  and mep58.codfilial = mep.codfilial                           ');
+        // SQL.Add('  and mep58.numtranswms = mep.numtranswms                       ');
+        // SQL.Add('  and mep58.codigouma = mep.codigouma                           ');
+        // SQL.Add('  and mep58.tipoos = 58                                         ');
+        // SQL.Add('  and mep58.posicao <> ''P''                                    ');
+        // end;
+        //
+        // SQL.Add('   where mep.data >= trunc(sysdate - 15)                                                                             ');
+        // SQL.Add('   and mep.codfilial = :CODFILIAL                                                                                    ');
+        // SQL.Add('   and mep.posicao = ''P''                                                                                           ');
+        // SQL.Add('   and mep.dtestorno is null                                                                                         ');
+        // SQL.Add('   and mep.codfuncos is null                                                                                         ');
+        // SQL.Add('   and mep.tipoos = :TIPOOS                                                                                          ');
+        // SQL.Add('   and pcwms.numtranswms is null                                                                                     ');
+        // SQL.Add('   and fila_execucao.numos is null                                                                                   ');
+        // SQL.Add('   and pendencias.numos is null                                                                                      ');
+        // SQL.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                              ');
+        // SQL.Add('   AND NVL(mep.CODROTINA, 0) NOT IN (1709, 1721)                                                                     ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('  and mep.codrotina = 1723                                                                                           ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('   group by mep.numos                                                                                                ');
+        // SQL.Add('     , pcendereco.rua                                                                                                ');
+        // SQL.Add('     , pcendereco.codendereco                                                                                        ');
+        // SQL.Add('     , mep.codigouma                                                                                                 ');
+        // SQL.Add('     , mep.codenderecoorig                                                                                           ');
+        // SQL.Add('     , mep.tipoos                                                                                                    ');
+        // SQL.Add('     , sep_pendentes.dataonda                                                                                        ');
+        // SQL.Add('     , sep_pendentes.numonda                                                                                         ');
+        // SQL.Add('                                                                                                                     ');
+        // SQL.Add('   order by sep_pendentes.dataonda                                                                                   ');
+        // SQL.Add('     , sep_pendentes.numonda                                                                                         ');
+        // SQL.Add('     , ordem_rua_anterior                                                                                            ');
+        // SQL.Add('     , ordem_range                                                                                                   ');
+        // SQL.Add(' ) where rownum = 1                                                                                                  ');
+
+        // Padrão tpEmpilhador
+        tipo_os := 58;
+
+        if aFiltro.TipoOperador = tpPaleteiro then
+        begin
+
+          tipo_os := 61;
+        end;
+
+        ParamByName('CODFILIAL').AsString := aFiltro.Filial;
+        ParamByName('RUAINICIAL').AsFloat := aFiltro.RuaInicial;
+        ParamByName('RUAFINAL').AsFloat := aFiltro.RuaFinal;
+        ParamByName('RUAANTERIOR').AsFloat := aFiltro.RuaAnterior;
+        ParamByName('TIPOOS').AsFloat := tipo_os;
+
+        // Clipboard.AsText := SQL.Text;
+
+        Open();
+
+        aProximaOS.AnalisesCriterios.Add('');
+        aProximaOS.AnalisesCriterios.Add('--------------------------------------');
+        aProximaOS.AnalisesCriterios.Add('Critério 8.2' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+        aProximaOS.AnalisesCriterios.Add('');
+        aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+        aProximaOS.AnalisesCriterios.Add('');
+        aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
+        aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+        aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+        aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+        aProximaOS.AnalisesCriterios.Add('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
+        aProximaOS.AnalisesCriterios.Add('TIPOOS: AP');
+        aProximaOS.AnalisesCriterios.Add('');
+        aProximaOS.AnalisesCriterios.Add('SQL:');
+        aProximaOS.AnalisesCriterios.Add(SQL.Text);
+
+        rua_encontrada := FieldByName('RUA').AsFloat;
+
+        if (not aFiltro.BuscarNoArmazemTodo) and ((rua_encontrada < aFiltro.RuaInicial) or (rua_encontrada > aFiltro.RuaFinal)) then
+        begin
+
+          Close();
+          ODACSessionGlobal.Rollback;
           Result := False;
           Exit;
         end;
+
+        if (dmdb.qryAuxiliar.RecordCount > 0) then
+        begin
+
+          dmdb.qryAuxiliar.First;
+
+          aProximaOS.NumeroOS := FieldByName('NUMOS').AsFloat;
+          aProximaOS.NumeroOnda := FieldByName('NUMONDA').AsFloat;
+          aProximaOS.CodigoEndereco := FieldByName('CODENDERECO').AsFloat;
+          aProximaOS.CodigoEnderecoOrigem := FieldByName('CODENDERECOORIG').AsFloat;
+          aProximaOS.TipoServico := 'AP';
+          aProximaOS.Rua := FieldByName('RUA').AsFloat;
+          aProximaOS.NumeroUMA := FieldByName('CODIGOUMA').AsFloat;
+          aProximaOS.TipoOS := FieldByName('TIPOOS').AsFloat;
+          aProximaOS.CriterioUtilizado := 8.2;
+
+          if (not FieldByName('DATAONDA').IsNull) and (FieldByName('DATAONDA').AsString <> '') then
+          begin
+
+            aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
+          end;
+
+          // processando abastecimento consolidado
+          if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
+            aFiltro.Filial, True) then
+          begin
+
+            aProximaOS.NumeroOS := 0;
+            aProximaOS.TipoServico := 'OC';
+
+            if not GravarOSsAbastecimentoConsolidado(aFiltro.Senha, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
+              aFiltro.Filial, True) then
+            begin
+
+              Result := False;
+              ODACSessionGlobal.Rollback;
+              Exit;
+            end;
+          end;
+
+          Result := True;
+        end;
+
+        Close();
+        ODACSessionGlobal.Commit;
+
       end;
-
-      Result := True;
     end;
+  except
+    on E: Exception do
+    begin
 
-    Close();
-
+      ODACSessionGlobal.Rollback;
+    end;
   end;
 
 end;
