@@ -1375,6 +1375,8 @@ begin
 
   // Item 8.2
   Result := False;
+  Log('Critério 8.2 - Desabilitado temporariamente');
+  Exit;
   tempo := Now;
 
   ODACSessionGlobal.StartTransaction();
