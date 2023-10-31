@@ -25,7 +25,7 @@ object FrmInicial: TFrmInicial
     Height = 456
     Align = alClient
     TabOrder = 0
-    Properties.ActivePage = tabOSAtribuidas
+    Properties.ActivePage = tabRobo
     Properties.CustomButtons.Buttons = <>
     ClientRectBottom = 453
     ClientRectLeft = 2
@@ -91,6 +91,14 @@ object FrmInicial: TFrmInicial
         Caption = 'Exibir mensagens log'
         State = cbsChecked
         TabOrder = 4
+        Transparent = True
+      end
+      object chkRegistrarLogs: TcxCheckBox
+        Left = 256
+        Top = 319
+        Caption = 'Registrar logs de analise de crit'#233'rios'
+        State = cbsChecked
+        TabOrder = 5
         Transparent = True
       end
     end

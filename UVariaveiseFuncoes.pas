@@ -25,10 +25,10 @@ type
   end;
 
 procedure CancelarSolicitacoesAbandonadas(aFilial: string; aConfig: TConfiguracoes);
-procedure AtenderSolicitacoes(aFilial: string);
+procedure AtenderSolicitacoes(aFilial: string; aConfig: TConfiguracoes;  aRegistrarAnalise: boolean);
 function SenhaEmExecucao(aMatricula: double; aTipoOperador: TTipoOperador): double;
 procedure RegistrarRetorno(aSenhaAtual: double; aSenhaAnterior: double);
-function RangeInformadoEDeExecao(aFilial: string; aRuaInicial, aRuaFinal: double): boolean;
+function RangeInformadoEDeExecao(aFilial: string; aRuaInicial, aRuaFinal: double; aConfig: TConfiguracoes): boolean;
 procedure Log(aMensagem: string);
 procedure ExibirAnalise();
 function ExisteOSsMesmoEnderecoOrigemEDestino(aNumeroOS: double; aCodigoEnderecoOrigem, aCodigoEndereco: double; aTipoOS: double; aFilial: string;
@@ -73,14 +73,6 @@ begin
 
   Log('Cancelando solicitações abandonadas');
 
-//  config_str := obtemConfiguracao(aFilial, 262);
-//
-//  if (not TryStrToFloat(config_str, minutos_tolerancia)) then
-//  begin
-//
-//    Exit;
-//  end;
-
   minutos_tolerancia := (aConfig.minutos_os_reservada_262 * -1);
 
   dmdb.qrySolicitacoesAbandonadas.Close;
@@ -95,8 +87,6 @@ begin
     Exit;
   end;
 
-  // BDEDatabase.StartTransaction;
-
   try
     begin
 
@@ -108,13 +98,11 @@ begin
 
       dmdb.qryCancelarSolicitacoesAbandonadas.Close;
 
-      // BDEDatabase.Commit;
     end;
   except
     on E: Exception do
     begin
 
-      // BDEDatabase.Rollback;
       Log('Erro: ' + E.Message);
       Log('Processo: ' + processo_atual);
     end;
@@ -252,11 +240,9 @@ begin
   Result := True;
 end;
 
-function RuasExcluidas(aFiltro: TFiltro): TStringList;
+function RuasExcluidas(aFiltro: TFiltro; aConfig: TConfiguracoes): TStringList;
 var
   ruas_excluidas: TStringList;
-  config_str: string;
-  config_cod: integer;
   maximo_funcionarios_na_rua: double;
   qry: TOraQuery;
 begin
@@ -269,23 +255,21 @@ begin
   ruas_excluidas := TStringList.Create;
   ruas_excluidas.Duplicates := dupIgnore;
 
-  // Padrão tpEmpilhador
-  config_cod := 252;
+  maximo_funcionarios_na_rua := 1000;
+
   qry := dmdb.qryRuasExcessoFuncionariosEmp;
 
-  if aFiltro.TipoOperador = tpPaleteiro then
+  if (aFiltro.TipoOperador = tpPaleteiro) then
   begin
 
-    config_cod := 251;
     qry := dmdb.qryRuasExcessoFuncionariosPalet;
+    maximo_funcionarios_na_rua := aConfig.qtd_limite_paleteiros_rua_251;
   end;
 
-  config_str := obtemConfiguracao(aFiltro.Filial, config_cod);
-
-  if (not TryStrToFloat(config_str, maximo_funcionarios_na_rua)) then
+  if (aFiltro.TipoOperador = tpEmpilhador) then
   begin
 
-    maximo_funcionarios_na_rua := 1000;
+    maximo_funcionarios_na_rua := aConfig.qtd_limite_empilhadores_rua_252;
   end;
 
   /// Listando as ruas que já tem gente demais
@@ -487,19 +471,19 @@ begin
 
     Open;
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUA: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('RUA: ' + FloatToStr(aFiltro.RuaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     if (dmdb.qryAuxiliar.RecordCount > 0) then
     begin
@@ -616,18 +600,18 @@ begin
 
     Open;
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 10');
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 10');
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     if (dmdb.qryAuxiliar.RecordCount > 0) then
     begin
@@ -749,18 +733,18 @@ begin
 
     Open;
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 6' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 6' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     if (dmdb.qryAuxiliar.RecordCount > 0) then
     begin
@@ -899,19 +883,19 @@ begin
 
     Open;
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 7' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('TIPOOS: ' + FloatToStr(tipo_os));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 7' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('TIPOOS: ' + FloatToStr(tipo_os));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     if (dmdb.qryAuxiliar.RecordCount > 0) then
     begin
@@ -1076,21 +1060,21 @@ begin
 
     Open();
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 8' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
-    aProximaOS.AnalisesCriterios.Add('TIPOOS: ' + FloatToStr(tipo_os));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 8' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('TIPOOS: ' + FloatToStr(tipo_os));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     rua_encontrada := FieldByName('RUA').AsFloat;
 
@@ -1311,21 +1295,21 @@ begin
 
     Open();
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 6.5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
-    aProximaOS.AnalisesCriterios.Add('TIPOOS: ' + FloatToStr(tipo_os));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 6.5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('TIPOOS: ' + FloatToStr(tipo_os));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     rua_encontrada := FieldByName('RUA').AsFloat;
 
@@ -1629,21 +1613,21 @@ begin
 
         Open();
 
-        aProximaOS.AnalisesCriterios.Add('');
-        aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-        aProximaOS.AnalisesCriterios.Add('Critério 8.2' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-        aProximaOS.AnalisesCriterios.Add('');
-        aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-        aProximaOS.AnalisesCriterios.Add('');
-        aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-        aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-        aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-        aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-        aProximaOS.AnalisesCriterios.Add('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
-        aProximaOS.AnalisesCriterios.Add('TIPOOS: AP');
-        aProximaOS.AnalisesCriterios.Add('');
-        aProximaOS.AnalisesCriterios.Add('SQL:');
-        aProximaOS.AnalisesCriterios.Add(SQL.Text);
+        aProximaOS.RegistrarAnaliseCriterios('');
+        aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+        aProximaOS.RegistrarAnaliseCriterios('Critério 8.2' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+        aProximaOS.RegistrarAnaliseCriterios('');
+        aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+        aProximaOS.RegistrarAnaliseCriterios('');
+        aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+        aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+        aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+        aProximaOS.RegistrarAnaliseCriterios('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+        aProximaOS.RegistrarAnaliseCriterios('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
+        aProximaOS.RegistrarAnaliseCriterios('TIPOOS: AP');
+        aProximaOS.RegistrarAnaliseCriterios('');
+        aProximaOS.RegistrarAnaliseCriterios('SQL:');
+        aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
         rua_encontrada := FieldByName('RUA').AsFloat;
 
@@ -1816,19 +1800,19 @@ begin
     ParamByName('TIPOOS').AsFloat := tipo_os;
     Open();
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 11' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 11' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     if (dmdb.qryAuxiliar.RecordCount > 0) then
     begin
@@ -1975,20 +1959,20 @@ begin
 
     Open();
 
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('--------------------------------------');
-    aProximaOS.AnalisesCriterios.Add('Critério 9.5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('CODFILIAL: ' + aFiltro.Filial);
-    aProximaOS.AnalisesCriterios.Add('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
-    aProximaOS.AnalisesCriterios.Add('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
-    aProximaOS.AnalisesCriterios.Add('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
-    aProximaOS.AnalisesCriterios.Add('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
-    aProximaOS.AnalisesCriterios.Add('');
-    aProximaOS.AnalisesCriterios.Add('SQL:');
-    aProximaOS.AnalisesCriterios.Add(SQL.Text);
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 9.5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('RUAANTERIOR: ' + FloatToStr(aFiltro.RuaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('ONDAANTERIOR: ' + FloatToStr(aFiltro.OndaAnterior));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
 
     rua_encontrada := FieldByName('RUA').AsFloat;
 
@@ -2266,7 +2250,7 @@ begin
   dmdb.qryTotalFuncRuas.Open;
 end;
 
-procedure AtenderSolicitacoes(aFilial: string);
+procedure AtenderSolicitacoes(aFilial: string; aConfig: TConfiguracoes; aRegistrarAnalise: boolean);
 var
   Senha: double;
   senha_anterior: double;
@@ -2306,25 +2290,9 @@ begin
       /// Obtendo a configuração que define a quantidade de OS pendentes
       /// pode definir uma rua como super lotada.
 
-      config_str := obtemConfiguracao(aFilial, 249);
-
-      if (not TryStrToFloat(config_str, qtd_os_para_superlotada)) then
-      begin
-
-        qtd_os_para_superlotada := 1000;
-      end;
-
-      config_str := obtemConfiguracao(aFilial, 263);
-
-      if (not TryStrToFloat(config_str, percentual_separacao_finalizada)) then
-      begin
-
-        percentual_separacao_finalizada := 100;
-      end;
-
-      trabalhar_com_pallet_box := (obtemConfiguracao(aFilial, 264) = 'S');
-
-
+      qtd_os_para_superlotada := aConfig.qtd_os_rua_lotada_249;
+      percentual_separacao_finalizada := aConfig.percentual_separacao_liberar_palletbox_263;
+      trabalhar_com_pallet_box := aConfig.trabalha_com_palletbox_264;
 
       // PercentualFinalizacaoSeparacao
 
@@ -2395,8 +2363,8 @@ begin
         filtro.DataOndaAnterior := IncDay(Date, -30);
         filtro.RuaSuperLotadaAntes := False;
         filtro.TipoOperador := TTipoOperador(Trunc(dmdb.qryCarregarSolicitacoesTIPOOPERADOR.AsFloat));
-        filtro.RangeRuasExcecao := RangeInformadoEDeExecao(aFilial, filtro.RuaInicial, filtro.RuaFinal);
-        filtro.ruasIgnorar := RuasExcluidas(filtro);
+        filtro.RangeRuasExcecao := RangeInformadoEDeExecao(aFilial, filtro.RuaInicial, filtro.RuaFinal, aConfig);
+        filtro.ruasIgnorar := RuasExcluidas(filtro, aConfig);
         filtro.ruasSuperLotadas := ruas_superlotadas;
         filtro.Matricula := Matricula;
         filtro.DataSolicitacao := dmdb.qryCarregarSolicitacoesDTSOLICITACAO.AsDateTime;
@@ -2408,10 +2376,6 @@ begin
         dmdb.qryDadosSenhaAnterior.ParamByName('MATRICULA').AsFloat := Matricula;
         dmdb.qryDadosSenhaAnterior.ParamByName('SENHA').AsFloat := Senha;
         dmdb.qryDadosSenhaAnterior.Open;
-
-        // debug
-        dmdb.qryCarregarSolicitacoes.Next;
-        continue;
 
         if (dmdb.qryDadosSenhaAnterior.RecordCount > 0) then
         begin
@@ -2433,7 +2397,7 @@ begin
 
         dmdb.qryDadosSenhaAnterior.Close;
 
-        proxima_os := TProximaOS.Create(Senha);
+        proxima_os := TProximaOS.Create(Senha, aRegistrarAnalise);
 
         // Com as ruas definidas pelo usuário
 
@@ -2475,6 +2439,10 @@ begin
           dmdb.qryCarregarSolicitacoes.Next;
           continue;
         end;
+
+        // debug
+//        dmdb.qryCarregarSolicitacoes.Next;
+//        continue;
 
         // Item 7 - OS de abastecimento corretivo mas com pendências
         Log('Analisando critério 7 - Senha: ' + FloatToStr(Senha));
@@ -2758,9 +2726,9 @@ begin
 
 end;
 
-function RangeInformadoEDeExecao(aFilial: string; aRuaInicial, aRuaFinal: double): boolean;
+function RangeInformadoEDeExecao(aFilial: string; aRuaInicial, aRuaFinal: double; aConfig: TConfiguracoes): boolean;
 var
-  lista_ruas_excecao: TStringList;
+  // lista_ruas_excecao: TStringList;
   I: double;
   range_excecao: boolean;
 begin
@@ -2769,16 +2737,12 @@ begin
   ///
 
   range_excecao := True;
-  lista_ruas_excecao := TStringList.Create;
-  lista_ruas_excecao.Delimiter := ',';
-  lista_ruas_excecao.DelimitedText := StringReplace(obtemConfiguracao(aFilial, 248), ' ', '', [rfReplaceAll]);
-
   I := aRuaInicial;
 
   while I <= aRuaFinal do
   begin
 
-    if lista_ruas_excecao.IndexOf(FloatToStr(I)) < 0 then
+    if aConfig.ruas_excecao_248.IndexOf(FloatToStr(I)) < 0 then
     begin
 
       range_excecao := False;

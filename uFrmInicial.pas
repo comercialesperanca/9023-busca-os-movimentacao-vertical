@@ -16,7 +16,7 @@ uses
   dxSkinOffice2013White, dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinOffice2019Colorful, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic,
   dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringtime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinTheBezier,
   dxSkinsDefaultPainters, dxSkinValentine, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint, dxSkinXmas2008Blue, dxBarBuiltInMenu, cxNavigator, dxDateRanges;
+  dxSkinWhiteprint, dxSkinXmas2008Blue, dxBarBuiltInMenu, cxNavigator, dxDateRanges, UVariaveiseFuncoes;
 
 type
   TFrmInicial = class(TForm)
@@ -59,6 +59,7 @@ type
     grdOSAtrbuidasDBTableView1SEGUNDOSLOCALIZACAOOS: TcxGridDBColumn;
     cxLookAndFeelController1: TcxLookAndFeelController;
     chkExibirMensagensLog: TcxCheckBox;
+    chkRegistrarLogs: TcxCheckBox;
     procedure grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnLimparLogClick(Sender: TObject);
@@ -75,14 +76,16 @@ type
 var
   FrmInicial: TFrmInicial;
   HABILITADO: boolean;
+  CONFIG: TConfiguracoes;
   EXECUTANDO: boolean;
   SEGUNDOS_PARA_CANCELAMENTO: integer;
   TEMPO_PADRAO_CANCELAMENTO: integer;
   QTD_INTEGRACOES_MESMA_CONEXAO: integer;
+  CONFIGURACAO_OBTIDA: boolean;
 
 implementation
 
-uses ULibrary, UVariaveiseFuncoes, UFRMDmdb;
+uses ULibrary, UFRMDmdb;
 
 {$R *.dfm}
 
@@ -97,6 +100,8 @@ begin
   logs := 0;
   QTD_INTEGRACOES_MESMA_CONEXAO := 0;
   chkExibirMensagensLog.Enabled := False;
+  chkRegistrarLogs.Enabled := False;
+  CONFIGURACAO_OBTIDA := False;
 end;
 
 procedure TFrmInicial.btnLimparLogClick(Sender: TObject);
@@ -112,6 +117,7 @@ begin
   btnParar.Enabled := False;
   btnIniciar.Enabled := true;
   chkExibirMensagensLog.Enabled := true;
+  chkRegistrarLogs.Enabled := true;
 end;
 
 procedure TFrmInicial.FormCreate(Sender: TObject);
@@ -124,6 +130,7 @@ end;
 procedure TFrmInicial.FormShow(Sender: TObject);
 begin
 
+  CONFIGURACAO_OBTIDA := False;
   pgcPrincipal.ActivePage := tabRobo;
   Self.Caption := ParamStr(5) + ' - Busca O.S. movimentação - versão: ' + Retorna_Versao();
   Application.Title := ParamStr(5) + ' - Busca O.S. movimentação';
@@ -136,8 +143,8 @@ begin
 end;
 
 procedure TFrmInicial.timerTimer(Sender: TObject);
-var
-  config: TConfiguracoes;
+// var
+// CONFIG: TConfiguracoes;
 begin
 
   if (HABILITADO) and (not EXECUTANDO) then
@@ -160,18 +167,26 @@ begin
       AtribuiSessionDmd(dmdb, ODACSessionGlobal);
 
       QTD_INTEGRACOES_MESMA_CONEXAO := 0;
+      CONFIGURACAO_OBTIDA := False;
     end;
 
     EXECUTANDO := true;
+
+    if not CONFIGURACAO_OBTIDA then
+    begin
+
+      CONFIG := TConfiguracoes.CarregarConfiguracoes('2');
+      CONFIGURACAO_OBTIDA := true;
+    end;
 
     try
       begin
 
         processo_atual := '';
 
-        config := TConfiguracoes.CarregarConfiguracoes('2');
-        CancelarSolicitacoesAbandonadas('2');
-        AtenderSolicitacoes('2');
+        // config := TConfiguracoes.CarregarConfiguracoes('2');
+        CancelarSolicitacoesAbandonadas('2', CONFIG);
+        AtenderSolicitacoes('2', CONFIG, chkRegistrarLogs.Checked);
       end;
     except
       on E: Exception do
