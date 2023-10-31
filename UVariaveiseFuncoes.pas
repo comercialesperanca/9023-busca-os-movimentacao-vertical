@@ -7,7 +7,24 @@ Uses
   // , Clipbrd
     ;
 
-procedure CancelarSolicitacoesAbandonadas(aFilial: string);
+type
+  TConfiguracoes = class
+  public
+    ruas_excecao_248: TStringList;
+    qtd_os_rua_lotada_249: integer;
+    qtd_limite_paleteiros_rua_251: integer;
+    qtd_limite_empilhadores_rua_252: integer;
+    minutos_os_reservada_262: integer;
+    percentual_separacao_liberar_palletbox_263: integer;
+    trabalha_com_palletbox_264: boolean;
+
+    class function CarregarConfiguracoes(aFilial: string): TConfiguracoes;
+
+    constructor Create();
+
+  end;
+
+procedure CancelarSolicitacoesAbandonadas(aFilial: string; aConfig: TConfiguracoes);
 procedure AtenderSolicitacoes(aFilial: string);
 function SenhaEmExecucao(aMatricula: double; aTipoOperador: TTipoOperador): double;
 procedure RegistrarRetorno(aSenhaAtual: double; aSenhaAnterior: double);
@@ -45,27 +62,26 @@ begin
   processo_atual := aMensagem;
   // FrmInicial.memo.Lines.Add( IntToStr(FrmInicial.memo.Lines.Count + 1) + ') ' + DateTimeToStr(Now) + ': ' + aMensagem);
   FrmInicial.memo.Lines.Add(FloatToStr(logs) + ') ' + DateTimeToStr(Now) + ': ' + aMensagem);
-  Application.ProcessMessages;
+  // Application.ProcessMessages;
 end;
 
-procedure CancelarSolicitacoesAbandonadas(aFilial: string);
+procedure CancelarSolicitacoesAbandonadas(aFilial: string; aConfig: TConfiguracoes);
 var
 
   minutos_tolerancia: double;
-  config_str: string;
 begin
 
   Log('Cancelando solicitações abandonadas');
 
-  config_str := obtemConfiguracao(aFilial, 262);
+//  config_str := obtemConfiguracao(aFilial, 262);
+//
+//  if (not TryStrToFloat(config_str, minutos_tolerancia)) then
+//  begin
+//
+//    Exit;
+//  end;
 
-  if (not TryStrToFloat(config_str, minutos_tolerancia)) then
-  begin
-
-    Exit;
-  end;
-
-  minutos_tolerancia := (minutos_tolerancia * -1);
+  minutos_tolerancia := (aConfig.minutos_os_reservada_262 * -1);
 
   dmdb.qrySolicitacoesAbandonadas.Close;
   dmdb.qrySolicitacoesAbandonadas.ParamByName('DTLIMITE').AsDateTime := IncMinute(Now, Trunc(minutos_tolerancia));
@@ -2393,6 +2409,10 @@ begin
         dmdb.qryDadosSenhaAnterior.ParamByName('SENHA').AsFloat := Senha;
         dmdb.qryDadosSenhaAnterior.Open;
 
+        // debug
+        dmdb.qryCarregarSolicitacoes.Next;
+        continue;
+
         if (dmdb.qryDadosSenhaAnterior.RecordCount > 0) then
         begin
 
@@ -2681,12 +2701,10 @@ begin
         dmdb.qryCarregarSolicitacoes.Next;
       end;
 
-      // BDEDatabase.Commit;
     end;
   except
     on E: Exception do
     begin
-      // BDEDatabase.Rollback;
       Log('Erro: ' + E.Message);
       Log('Processo atual: ' + processo_atual);
     end;
@@ -2790,6 +2808,131 @@ begin
   end;
 
   frmAnalisesatribuicao.ShowModal();
+end;
+
+{ TConfiguracoes }
+
+class function TConfiguracoes.CarregarConfiguracoes(aFilial: string): TConfiguracoes;
+var
+  config: TConfiguracoes;
+  config_str: string;
+  config_float: double;
+begin
+
+  config := TConfiguracoes.Create;
+  Result := config;
+
+  with dmdb do
+  begin
+
+    qryConfiguracoes.Close;
+    qryConfiguracoes.ParamByName('CODFILIAL').AsString := aFilial;
+    qryConfiguracoes.Open;
+
+    qryConfiguracoes.First;
+
+    while (not qryConfiguracoes.Eof) do
+    begin
+
+      if qryConfiguracoesCODIGO.AsFloat = 248 then
+      begin
+
+        config.ruas_excecao_248.Delimiter := ',';
+        config.ruas_excecao_248.DelimitedText := StringReplace(qryConfiguracoesVALOR.AsString, ' ', '', [rfReplaceAll]);
+      end;
+
+      if qryConfiguracoesCODIGO.AsFloat = 249 then
+      begin
+
+        config_str := qryConfiguracoesVALOR.AsString;
+
+        if TryStrToFloat(config_str, config_float) then
+        begin
+
+          config.qtd_os_rua_lotada_249 := Trunc(config_float);
+        end;
+
+      end;
+
+      if qryConfiguracoesCODIGO.AsFloat = 251 then
+      begin
+
+        config_str := qryConfiguracoesVALOR.AsString;
+
+        if TryStrToFloat(config_str, config_float) then
+        begin
+
+          config.qtd_limite_paleteiros_rua_251 := Trunc(config_float);
+        end;
+
+      end;
+
+      if qryConfiguracoesCODIGO.AsFloat = 252 then
+      begin
+
+        config_str := qryConfiguracoesVALOR.AsString;
+
+        if TryStrToFloat(config_str, config_float) then
+        begin
+
+          config.qtd_limite_empilhadores_rua_252 := Trunc(config_float);
+        end;
+
+      end;
+
+      if qryConfiguracoesCODIGO.AsFloat = 262 then
+      begin
+
+        config_str := qryConfiguracoesVALOR.AsString;
+
+        if TryStrToFloat(config_str, config_float) then
+        begin
+
+          config.minutos_os_reservada_262 := Trunc(config_float);
+        end;
+
+      end;
+
+      if qryConfiguracoesCODIGO.AsFloat = 263 then
+      begin
+
+        config_str := qryConfiguracoesVALOR.AsString;
+
+        if TryStrToFloat(config_str, config_float) then
+        begin
+
+          config.percentual_separacao_liberar_palletbox_263 := Trunc(config_float);
+        end;
+
+      end;
+
+      if qryConfiguracoesCODIGO.AsFloat = 264 then
+      begin
+
+        config_str := qryConfiguracoesVALOR.AsString;
+        config.trabalha_com_palletbox_264 := config_str = 'S';
+      end;
+
+      qryConfiguracoes.Next;
+    end;
+
+    qryConfiguracoes.Close;
+
+  end;
+
+end;
+
+constructor TConfiguracoes.Create;
+begin
+
+  ruas_excecao_248 := TStringList.Create;
+  qtd_os_rua_lotada_249 := 0;
+  qtd_limite_paleteiros_rua_251 := 0;
+  qtd_limite_empilhadores_rua_252 := 0;
+  minutos_os_reservada_262 := 0;
+  percentual_separacao_liberar_palletbox_263 := 100;
+  trabalha_com_palletbox_264 := False;
+
 end;
 
 end.

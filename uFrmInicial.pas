@@ -136,6 +136,8 @@ begin
 end;
 
 procedure TFrmInicial.timerTimer(Sender: TObject);
+var
+  config: TConfiguracoes;
 begin
 
   if (HABILITADO) and (not EXECUTANDO) then
@@ -167,6 +169,7 @@ begin
 
         processo_atual := '';
 
+        config := TConfiguracoes.CarregarConfiguracoes('2');
         CancelarSolicitacoesAbandonadas('2');
         AtenderSolicitacoes('2');
       end;

@@ -1156,9 +1156,49 @@ object dmdb: Tdmdb
       end>
     Username = 'ESPERANCA'
     Server = 'teste-scan:1521/WINT'
+    Connected = True
     LoginPrompt = False
     Left = 72
     Top = 24
     EncryptedPassword = 'ABFFBAFFACFFABFFBAFFBAFFACFFAFFFBAFFADFFBEFFB1FFBCFFBEFF'
+  end
+  object qryConfiguracoes: TOraQuery
+    Session = OraSession1
+    SQL.Strings = (
+      'SELECT '
+      #9'CODIGO'
+      #9', VALOR'
+      'FROM BOCONFIG'
+      'WHERE CODIGO IN (262, 252, 251, 249, 263, 264, 248)'
+      'AND PORFILIAL = '#39'N'#39
+      ''
+      'UNION ALL'
+      ''
+      'SELECT '
+      #9'C.CODIGO'
+      #9', D.VALOR'
+      'FROM BOCONFIG C'
+      'JOIN BOCONFIGDETALHE D'
+      #9'ON D.CODIGO = C.CODIGO'
+      #9'AND D.FILIAL = :CODFILIAL'
+      'WHERE D.CODIGO IN (262, 252, 251, 249, 263, 264, 248)'
+      'AND C.PORFILIAL = '#39'S'#39
+      ''
+      'ORDER BY CODIGO')
+    Left = 88
+    Top = 696
+    ParamData = <
+      item
+        DataType = ftUnknown
+        Name = 'CODFILIAL'
+        Value = nil
+      end>
+    object qryConfiguracoesCODIGO: TFloatField
+      FieldName = 'CODIGO'
+    end
+    object qryConfiguracoesVALOR: TStringField
+      FieldName = 'VALOR'
+      Size = 200
+    end
   end
 end

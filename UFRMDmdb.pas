@@ -88,6 +88,9 @@ type
     qryTotalOSRuasRUA: TIntegerField;
     qryTotalOSRuasTOTAL: TFloatField;
     qryOSsMesmoEnderecoOrigemNUMOS: TFloatField;
+    qryConfiguracoes: TOraQuery;
+    qryConfiguracoesCODIGO: TFloatField;
+    qryConfiguracoesVALOR: TStringField;
   private
     { Private declarations }
   public
