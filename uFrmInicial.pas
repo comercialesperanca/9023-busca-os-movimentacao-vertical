@@ -82,6 +82,7 @@ var
   TEMPO_PADRAO_CANCELAMENTO: integer;
   QTD_INTEGRACOES_MESMA_CONEXAO: integer;
   CONFIGURACAO_OBTIDA: boolean;
+  NECESSARIO_RECONECTAR_DB: boolean;
 
 implementation
 
@@ -131,6 +132,7 @@ procedure TFrmInicial.FormShow(Sender: TObject);
 begin
 
   CONFIGURACAO_OBTIDA := False;
+  NECESSARIO_RECONECTAR_DB := False;
   pgcPrincipal.ActivePage := tabRobo;
   Self.Caption := ParamStr(5) + ' - Busca O.S. movimentação - versão: ' + Retorna_Versao();
   Application.Title := ParamStr(5) + ' - Busca O.S. movimentação';
@@ -157,14 +159,30 @@ begin
     // Refazendo a conexão a cada 10 minutos
     // Como cada loop é a cada segundo, então 600 segundos são 10 minutos
     // como há o tempo de validações e etc, esse tempo de 10 minutos é aproximado
-    if QTD_INTEGRACOES_MESMA_CONEXAO >= 600 then
+    if (NECESSARIO_RECONECTAR_DB) or (QTD_INTEGRACOES_MESMA_CONEXAO >= 600) then
     begin
 
       ODACSessionGlobal.Connected := False;
       ODACSessionGlobal.Close;
 
-      abrirConexaoODAC();
-      AtribuiSessionDmd(dmdb, ODACSessionGlobal);
+      try
+        begin
+
+          abrirConexaoODAC();
+          AtribuiSessionDmd(dmdb, ODACSessionGlobal);
+
+          NECESSARIO_RECONECTAR_DB := False;
+        end;
+      except
+        on E: Exception do
+        begin
+
+          memo.Lines.Add(DateTimeToStr(Now()) + ': Erro ao conectar ao banco de dados: ' + E.Message);
+          EXECUTANDO := False;
+          NECESSARIO_RECONECTAR_DB := true;
+          Exit;
+        end;
+      end;
 
       QTD_INTEGRACOES_MESMA_CONEXAO := 0;
       CONFIGURACAO_OBTIDA := False;
@@ -192,8 +210,11 @@ begin
       on E: Exception do
       begin
 
-        memo.Lines.Add('Erro: ' + E.Message);
-        memo.Lines.Add('Processo do erro: ' + processo_atual);
+        memo.Lines.Add(DateTimeToStr(Now()) + ': Erro ' + E.Message + ' >> Processo do erro: ' + processo_atual);
+
+        EXECUTANDO := False;
+        NECESSARIO_RECONECTAR_DB := true;
+        Exit;
       end;
     end;
 
