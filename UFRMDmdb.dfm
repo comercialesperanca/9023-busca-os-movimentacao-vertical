@@ -3,7 +3,6 @@ object dmdb: Tdmdb
   Height = 812
   Width = 668
   object qryCancelarSolicitacoesAbandonadas: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'UPDATE BOFILAOS SET'
       'STATUS = '#39'C'#39
@@ -20,7 +19,6 @@ object dmdb: Tdmdb
       end>
   end
   object qryOSEmExecucao: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       
         'select nvl(numos, 0) as numos, senha, nvl(codendereco,0) as code' +
@@ -68,7 +66,6 @@ object dmdb: Tdmdb
     end
   end
   object qryCancelarSenha: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'update bofilaos set'
       'status = '#39'C'#39
@@ -83,7 +80,6 @@ object dmdb: Tdmdb
       end>
   end
   object qryRegistrarRetorno: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'UPDATE bofilaos '
       'SET    ( ruarangeinicio, ruarangefim, status, numos, '
@@ -129,7 +125,6 @@ object dmdb: Tdmdb
       end>
   end
   object qryCarregarSolicitacoes: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'SELECT'
       '  senha, '
@@ -141,7 +136,8 @@ object dmdb: Tdmdb
         ' (case when nvl(tipooperador, '#39'E'#39') = '#39'E'#39' then 0 else 1 end) tipo' +
         'operador'
       'FROM bofilaos'
-      'where status = '#39'A'#39
+      'WHERE dtsolicitacao >= trunc(sysdate) - 1 '
+      'AND status = '#39'A'#39
       'order by senha')
     Left = 263
     Top = 80
@@ -169,7 +165,6 @@ object dmdb: Tdmdb
     end
   end
   object qryDadosSenhaAnterior: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'select '
       
@@ -230,7 +225,6 @@ object dmdb: Tdmdb
     end
   end
   object qryRuasExcessoFuncionariosEmp: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'select pcendereco.rua'
       'from bofilaos'
@@ -264,7 +258,6 @@ object dmdb: Tdmdb
     end
   end
   object qryRuasExcecao: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       
         '(SELECT DISTINCT TRIM(REGEXP_SUBSTR(VALOR, '#39'[^,]+'#39', 1, LEVEL)) R' +
@@ -287,7 +280,6 @@ object dmdb: Tdmdb
     end
   end
   object qryAbastecimentoSuperLotacao: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'select '
       '  numos,'
@@ -360,7 +352,6 @@ object dmdb: Tdmdb
     end
   end
   object qryAtenderSolicitacao: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'UPDATE bofilaos SET'
       '  STATUS = '#39'R'#39','
@@ -443,41 +434,34 @@ object dmdb: Tdmdb
       end>
   end
   object qryAuxiliar: TOraQuery
-    Session = OraSession1
     Left = 88
     Top = 304
   end
   object qryRuasExcessoOS: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'SELECT'
-      '  pcendereco.rua  '
+      '  pcendereco.rua'
       'FROM PCMOVENDPEND'
       
         'join pcendereco on pcendereco.codendereco = PCMOVENDPEND.codende' +
         'reco and PCMOVENDPEND.tipoos = 98'
       
         'join pcmovendpend mep97 on pcmovendpend.codigouma = mep97.codigo' +
-        'uma          '
-      
-        '                            and mep97.tipoos = 97               ' +
-        '             '
+        'uma'
+      '                            and mep97.tipoos = 97'
       
         '                            and mep97.numtranswms = pcmovendpend' +
-        '.numtranswms '
+        '.numtranswms'
       '                            and mep97.dtfimos is not null'
       ''
-      
-        'WHERE pcmovendpend.posicao = '#39'P'#39'                                ' +
-        '                '
-      
-        '    and pcmovendpend.codfilial = :CODFILIAL                     ' +
-        '                   '
-      
-        '    and pcmovendpend.dtestorno is null                          ' +
-        '                   '
+      'WHERE'
+      '    pcmovendpend.codfilial = :CODFILIAL'
+      '    AND pcmovendpend.DATA >= trunc(sysdate - 30)'
+      '    AND pcmovendpend.posicao = '#39'P'#39
+      '    and pcmovendpend.dtestorno is null'
       '    and pcmovendpend.tipoos = 98'
-      'group by pcendereco.rua '
+      ''
+      'group by pcendereco.rua'
       'having count(distinct PCMOVENDPEND.NUMOS) >= :MAXIMOPORRUA'
       'order by pcendereco.rua')
     Left = 399
@@ -498,7 +482,6 @@ object dmdb: Tdmdb
     end
   end
   object qrySolicitacoesAbandonadas: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'SELECT SENHA FROM BOFILAOS'
       'WHERE dtatribuida IS NULL'
@@ -635,7 +618,6 @@ object dmdb: Tdmdb
     Top = 288
   end
   object qryTotalOSRuas: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'SELECT '
       '  pcendereco.rua  '
@@ -647,12 +629,10 @@ object dmdb: Tdmdb
       
         '                  or (pcendereco.codendereco = PCMOVENDPEND.code' +
         'ndereco and PCMOVENDPEND.tipoos = 98) '
-      
-        'WHERE pcmovendpend.posicao = '#39'P'#39'                                ' +
-        '                '
-      
-        '    and pcmovendpend.codfilial = :CODFILIAL                     ' +
-        '                   '
+      'WHERE                                          '
+      '    pcmovendpend.codfilial = :CODFILIAL        '
+      '    AND pcmovendpend.DATA >= trunc(sysdate - 30)'
+      '    AND pcmovendpend.posicao = '#39'P'#39'       '
       
         '    and pcmovendpend.dtestorno is null                          ' +
         '                   '
@@ -675,7 +655,6 @@ object dmdb: Tdmdb
     end
   end
   object qryTotalFuncRuas: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'select pcendereco.rua, count(bofilaos.matricula) as total'
       'from bofilaos'
@@ -685,7 +664,8 @@ object dmdb: Tdmdb
       
         '                  or (pcendereco.codendereco = bofilaos.codender' +
         'eco and bofilaos.tipoos = 98)'
-      'where bofilaos.status in ('#39'E'#39','#39'R'#39')'
+      'where bofilaos.DTSOLICITACAO >= trunc(sysdate - 30)'
+      'AND bofilaos.status in ('#39'E'#39','#39'R'#39')'
       'and pcendereco.codfilial = :CODFILIAL'
       'group by pcendereco.rua')
     Left = 271
@@ -704,7 +684,6 @@ object dmdb: Tdmdb
     end
   end
   object qryRuasExcessoFuncionariosPalet: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'select'
       '     pcendereco.rua'
@@ -737,7 +716,6 @@ object dmdb: Tdmdb
     end
   end
   object qryOSsMesmoEnderecoOrigem: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'SELECT   pcmovendpend.NUMOS'
       'FROM     pcmovendpend '
@@ -808,7 +786,6 @@ object dmdb: Tdmdb
     end
   end
   object qryGravarBOFILAOSR: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'INSERT INTO BOFILAOSR (senha, numos) VALUES (:SENHA, :NUMOS)')
     Left = 96
@@ -826,7 +803,6 @@ object dmdb: Tdmdb
       end>
   end
   object qryClonarOS: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'INSERT INTO PCMOVENDPEND ('#9#9
       '        NUMOS'
@@ -1143,27 +1119,7 @@ object dmdb: Tdmdb
         Value = nil
       end>
   end
-  object OraSession1: TOraSession
-    Options.Direct = True
-    DataTypeMap = <
-      item
-        DBType = 106
-        FieldType = ftFloat
-      end
-      item
-        DBType = 107
-        FieldType = ftFloat
-      end>
-    Username = 'ESPERANCA'
-    Server = 'teste-scan:1521/WINT'
-    Connected = True
-    LoginPrompt = False
-    Left = 72
-    Top = 24
-    EncryptedPassword = 'ABFFBAFFACFFABFFBAFFBAFFACFFAFFFBAFFADFFBEFFB1FFBCFFBEFF'
-  end
   object qryConfiguracoes: TOraQuery
-    Session = OraSession1
     SQL.Strings = (
       'SELECT '
       #9'CODIGO'

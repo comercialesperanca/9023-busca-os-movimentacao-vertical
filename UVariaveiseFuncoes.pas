@@ -25,7 +25,7 @@ type
   end;
 
 procedure CancelarSolicitacoesAbandonadas(aFilial: string; aConfig: TConfiguracoes);
-procedure AtenderSolicitacoes(aFilial: string; aConfig: TConfiguracoes;  aRegistrarAnalise: boolean);
+procedure AtenderSolicitacoes(aFilial: string; aConfig: TConfiguracoes; aRegistrarAnalise: boolean);
 function SenhaEmExecucao(aMatricula: double; aTipoOperador: TTipoOperador): double;
 procedure RegistrarRetorno(aSenhaAtual: double; aSenhaAnterior: double);
 function RangeInformadoEDeExecao(aFilial: string; aRuaInicial, aRuaFinal: double; aConfig: TConfiguracoes): boolean;
@@ -2273,12 +2273,13 @@ begin
   dmdb.qryCarregarSolicitacoes.Close;
   dmdb.qryCarregarSolicitacoes.Open;
 
-  dmdb.qryCarregarSolicitacoes.FetchAll;
+  // dmdb.qryCarregarSolicitacoes.FetchAll;
 
   if dmdb.qryCarregarSolicitacoes.RecordCount = 0 then
   begin
 
     Log('Sem solicitações pendentes');
+    dmdb.qryCarregarSolicitacoes.Close;
     Exit;
   end;
 
@@ -2301,8 +2302,12 @@ begin
       Log(IntToStr(dmdb.qryCarregarSolicitacoes.RecordCount) + ' solicitações encontradas');
       dmdb.qryCarregarSolicitacoes.First;
 
+      filtro := TFiltro.Create;
+
       while (not dmdb.qryCarregarSolicitacoes.Eof) do
       begin
+
+        Application.ProcessMessages;
 
         /// Carregando os totais de OS e funcionáios por rua
         /// a informação será usada pelo log da rotina
@@ -2352,7 +2357,6 @@ begin
 
         /// O filtro contém as informações necessárias para pesquisa das OS
 
-        filtro := TFiltro.Create;
         filtro.Senha := dmdb.qryCarregarSolicitacoesSENHA.AsFloat;
         filtro.RuaInicial := dmdb.qryCarregarSolicitacoesRUARANGEINICIO.AsFloat;
         filtro.RuaFinal := dmdb.qryCarregarSolicitacoesRUARANGEFIM.AsFloat;
@@ -2441,8 +2445,8 @@ begin
         end;
 
         // debug
-//        dmdb.qryCarregarSolicitacoes.Next;
-//        continue;
+        // dmdb.qryCarregarSolicitacoes.Next;
+        // continue;
 
         // Item 7 - OS de abastecimento corretivo mas com pendências
         Log('Analisando critério 7 - Senha: ' + FloatToStr(Senha));
@@ -2668,6 +2672,13 @@ begin
         Log('SOLICITAÇÃO NÃO ATENDIDA: SENHA - ' + FloatToStr(proxima_os.Senha) + ' Funcionário - ' + FloatToStr(Matricula));
         dmdb.qryCarregarSolicitacoes.Next;
       end;
+
+      dmdb.qryCarregarSolicitacoes.Close;
+
+      dmdb.qryTotalOSRuas.Close;
+      dmdb.qryTotalFuncRuas.Close;
+
+      FreeAndNil(filtro);
 
     end;
   except

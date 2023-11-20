@@ -89,7 +89,6 @@ object FrmInicial: TFrmInicial
         Left = 8
         Top = 319
         Caption = 'Exibir mensagens log'
-        State = cbsChecked
         TabOrder = 4
         Transparent = True
       end
@@ -97,7 +96,6 @@ object FrmInicial: TFrmInicial
         Left = 256
         Top = 319
         Caption = 'Registrar logs de analise de crit'#233'rios'
-        State = cbsChecked
         TabOrder = 5
         Transparent = True
       end

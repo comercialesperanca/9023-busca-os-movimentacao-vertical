@@ -55,7 +55,6 @@ type
     qryOSsMesmoEnderecoOrigem: TOraQuery;
     qryGravarBOFILAOSR: TOraQuery;
     qryClonarOS: TOraQuery;
-    OraSession1: TOraSession;
     qryCarregarSolicitacoesSENHA: TFloatField;
     qryCarregarSolicitacoesMATRICULA: TIntegerField;
     qryCarregarSolicitacoesRUARANGEINICIO: TIntegerField;

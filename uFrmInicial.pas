@@ -16,7 +16,7 @@ uses
   dxSkinOffice2013White, dxSkinOffice2016Colorful, dxSkinOffice2016Dark, dxSkinOffice2019Colorful, dxSkinPumpkin, dxSkinSeven, dxSkinSevenClassic,
   dxSkinSharp, dxSkinSharpPlus, dxSkinSilver, dxSkinSpringtime, dxSkinStardust, dxSkinSummer2008, dxSkinTheAsphaltWorld, dxSkinTheBezier,
   dxSkinsDefaultPainters, dxSkinValentine, dxSkinVisualStudio2013Blue, dxSkinVisualStudio2013Dark, dxSkinVisualStudio2013Light, dxSkinVS2010,
-  dxSkinWhiteprint, dxSkinXmas2008Blue, dxBarBuiltInMenu, cxNavigator, dxDateRanges, UVariaveiseFuncoes;
+  dxSkinWhiteprint, dxSkinXmas2008Blue, dxBarBuiltInMenu, cxNavigator, dxDateRanges, UVariaveiseFuncoes, DateUtils;
 
 type
   TFrmInicial = class(TForm)
@@ -67,6 +67,7 @@ type
     procedure btnIniciarClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure timerTimer(Sender: TObject);
+    procedure executarProcessamento();
   private
     { Private declarations }
   public
@@ -83,6 +84,7 @@ var
   QTD_INTEGRACOES_MESMA_CONEXAO: integer;
   CONFIGURACAO_OBTIDA: boolean;
   NECESSARIO_RECONECTAR_DB: boolean;
+  ULT_CHECAGEM_CANCELAMENTO: TDateTime;
 
 implementation
 
@@ -121,32 +123,10 @@ begin
   chkRegistrarLogs.Enabled := true;
 end;
 
-procedure TFrmInicial.FormCreate(Sender: TObject);
-begin
-
-  HABILITADO := False;
-  dmdb.cdsOSsAtribuidas.CreateDataSet;
-end;
-
-procedure TFrmInicial.FormShow(Sender: TObject);
-begin
-
-  CONFIGURACAO_OBTIDA := False;
-  NECESSARIO_RECONECTAR_DB := False;
-  pgcPrincipal.ActivePage := tabRobo;
-  Self.Caption := ParamStr(5) + ' - Busca O.S. movimentação - versão: ' + Retorna_Versao();
-  Application.Title := ParamStr(5) + ' - Busca O.S. movimentação';
-end;
-
-procedure TFrmInicial.grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
-begin
-
-  ExibirAnalise();
-end;
-
-procedure TFrmInicial.timerTimer(Sender: TObject);
-// var
-// CONFIG: TConfiguracoes;
+procedure TFrmInicial.executarProcessamento;
+var
+  minutos_ult_checagem_cancelamento: integer;
+  I: integer;
 begin
 
   if (HABILITADO) and (not EXECUTANDO) then
@@ -202,9 +182,31 @@ begin
 
         processo_atual := '';
 
-        // config := TConfiguracoes.CarregarConfiguracoes('2');
-        CancelarSolicitacoesAbandonadas('2', CONFIG);
+        minutos_ult_checagem_cancelamento := MinutesBetween(Now, ULT_CHECAGEM_CANCELAMENTO);
+
+        if minutos_ult_checagem_cancelamento >= CONFIG.minutos_os_reservada_262 then
+        begin
+
+          CancelarSolicitacoesAbandonadas('2', CONFIG);
+          ULT_CHECAGEM_CANCELAMENTO := Now;
+        end;
+
         AtenderSolicitacoes('2', CONFIG, chkRegistrarLogs.Checked);
+
+        { teste para verificar as queries que ficaram abertas }
+        // for I := 0 to dmdb.ComponentCount - 1 do
+        // begin
+        // if (dmdb.Components[I] is TOraQuery) then
+        // begin
+        // if (TOraQuery(dmdb.Components[I]).Active = true) then
+        // begin
+        //
+        // ShowMessage(TOraQuery(dmdb.Components[I]).Name);
+        //
+        // end;
+        // end;
+        // end;
+
       end;
     except
       on E: Exception do
@@ -235,6 +237,53 @@ begin
   end;
 
   SEGUNDOS_PARA_CANCELAMENTO := SEGUNDOS_PARA_CANCELAMENTO + 1;
+
+end;
+
+procedure TFrmInicial.FormCreate(Sender: TObject);
+begin
+
+  HABILITADO := False;
+  dmdb.cdsOSsAtribuidas.CreateDataSet;
+end;
+
+procedure TFrmInicial.FormShow(Sender: TObject);
+begin
+
+  CONFIGURACAO_OBTIDA := False;
+  NECESSARIO_RECONECTAR_DB := False;
+  pgcPrincipal.ActivePage := tabRobo;
+  Self.Caption := ParamStr(5) + ' - Busca O.S. movimentação - versão: ' + Retorna_Versao();
+  Application.Title := ParamStr(5) + ' - Busca O.S. movimentação';
+
+  ULT_CHECAGEM_CANCELAMENTO := IncDay(Now, -1);
+end;
+
+procedure TFrmInicial.grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
+begin
+
+  ExibirAnalise();
+end;
+
+procedure TFrmInicial.timerTimer(Sender: TObject);
+begin
+
+  try
+    begin
+
+      executarProcessamento();
+    end;
+  except
+    on E: Exception do
+    begin
+      memo.Lines.Add(DateTimeToStr(Now()) + ': Erro ' + E.Message + ' >> Processo do erro: ' + processo_atual);
+
+      EXECUTANDO := False;
+      NECESSARIO_RECONECTAR_DB := true;
+      Exit;
+
+    end;
+  end;
 
 end;
 
