@@ -12,6 +12,7 @@ type
     function GetQueryCriterio6_5(filtro: TFiltro): string;
     function GetQueryCriterio7(filtro: TFiltro): string;
     function GetQueryCriterio8(filtro: TFiltro): string;
+    function GetQueryCriterio8_2(filtro: TFiltro): string;
 
   public
     function GetQuery(numero_criterio: double; filtro: TFiltro): string;
@@ -56,6 +57,12 @@ begin
   begin
 
     Result := self.GetQueryCriterio8(filtro);
+  end;
+
+  if numero_criterio = 8.2 then
+  begin
+
+    Result := self.GetQueryCriterio8_2(filtro);
   end;
 
 end;
@@ -541,6 +548,106 @@ begin
   sql.Add(' order by dataonda, numonda, ordem_range, ordem_rua_anterior, pcendereco.rua, pcmovendpend.numos ');
 
   sql.Add(') where rownum = 1  ');
+
+  Result := sql.Text;
+
+end;
+
+function TQueryBuilder.GetQueryCriterio8_2(filtro: TFiltro): string;
+var
+  sql: TStringList;
+  ruasIgnorar, ruasSuperLotadas: string;
+begin
+
+  ruasIgnorar := filtro.ruasIgnorar.DelimitedText;
+  ruasSuperLotadas := filtro.ruasSuperLotadas.DelimitedText;
+
+  sql := TStringList.Create();
+
+  sql.Add(' with sep_pendentes as                                                                                    ');
+  sql.Add(' (                                                                                                        ');
+  sql.Add('    select                                                                                                ');
+  sql.Add('     pcmovendpend.codendereco                                                                             ');
+  sql.Add('     , bodefineondai.data as dataonda                                                                     ');
+  sql.Add('     , bodefineondai.numonda                                                                              ');
+  sql.Add('     , bodefineondai.numordem                                                                             ');
+  sql.Add('   from pcmovendpend                                                                                      ');
+  sql.Add('   join bodefineondai  on bodefineondai.numtranswms = pcmovendpend.numtranswms                            ');
+  sql.Add('                       and bodefineondai.data >= pcmovendpend.data                                        ');
+  sql.Add('   where pcmovendpend.data >= trunc(sysdate - 10)                                                         ');
+  sql.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                ');
+  sql.Add('   and pcmovendpend.posicao = ''P''                                                                       ');
+  sql.Add('   and pcmovendpend.dtestorno is null                                                                     ');
+  sql.Add('   and pcmovendpend.codfuncos is null                                                                     ');
+  sql.Add('   and pcmovendpend.tipoos in (10, 22)                                                                    ');
+  sql.Add(' ),                                                                                                       ');
+  sql.Add(' fila_execucao as (                                                                                       ');
+  sql.Add('   select bofilaos.numos                                                                                  ');
+  sql.Add('   FROM bofilaos                                                                                          ');
+  sql.Add('   where bofilaos.status in (''E'',''R'')                                                                 ');
+  sql.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                      ');
+  sql.Add('                                                                                                          ');
+  sql.Add('   union all                                                                                              ');
+  sql.Add('                                                                                                          ');
+  sql.Add('   select bofilaosR.numos                                                                                 ');
+  sql.Add('   FROM bofilaosR                                                                                         ');
+  sql.Add('   join bofilaos on bofilaosR.senha = bofilaos.senha                                                      ');
+  sql.Add('   where  bofilaos.status in (''E'',''R'')                                                                ');
+  sql.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                      ');
+  sql.Add(' ),                                                                                                       ');
+  sql.Add('                                                                                                          ');
+  sql.Add(' pendencias as (                                                                                          ');
+  sql.Add('   select pend.numos                                                                                      ');
+  sql.Add('   from booscompendencia pend                                                                             ');
+  sql.Add('   where pend.datainclusao >= trunc(sysdate -  10)                                                        ');
+  sql.Add('   and pend.dataliberacao is null                                                                         ');
+  sql.Add(' )                                                                                                        ');
+  sql.Add('                                                                                                          ');
+  sql.Add('   select                                                                                                 ');
+  sql.Add('     mep.numos                                                                                            ');
+  sql.Add('     , pcendereco.rua                                                                                     ');
+  sql.Add('     , pcendereco.codendereco                                                                             ');
+  sql.Add('     , mep.codigouma                                                                                      ');
+  sql.Add('     , mep.codenderecoorig                                                                                ');
+  sql.Add('     , mep.tipoos                                                                                         ');
+  sql.Add('     , sep_pendentes.dataonda                                                                             ');
+  sql.Add('     , sep_pendentes.numonda                                                                              ');
+  sql.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                     ');
+  sql.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range ');
+  sql.Add('   from pcmovendpend mep                                                                                  ');
+  sql.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                 ');
+  sql.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                            ');
+  sql.Add('   join sep_pendentes on sep_pendentes.codendereco = mep.codendereco                                      ');
+
+  if filtro.TipoOperador = tpPaleteiro then
+  begin
+
+    sql.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
+    sql.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
+    sql.Add('  and mep58.codfilial = mep.codfilial                           ');
+    sql.Add('  and mep58.numtranswms = mep.numtranswms                       ');
+    sql.Add('  and mep58.codigouma = mep.codigouma                           ');
+    sql.Add('  and mep58.tipoos = 58                                         ');
+    sql.Add('  and mep58.posicao <> ''P''                                    ');
+  end;
+
+  sql.Add('   where mep.data >= trunc(sysdate - 15)                                                                  ');
+  sql.Add('   and mep.codfilial = :CODFILIAL                                                                         ');
+  sql.Add('   and mep.posicao = ''P''                                                                                ');
+  sql.Add('   and mep.dtestorno is null                                                                              ');
+  sql.Add('   and mep.codfuncos is null                                                                              ');
+  sql.Add('   and mep.tipoos = :TIPOOS                                                                               ');
+  sql.Add('   and pcwms.numtranswms is NULL                                                                          ');
+  sql.Add('   AND NOT EXISTS (SELECT 1 FROM fila_execucao WHERE fila_execucao.NUMOS = mep.numos)                     ');
+  sql.Add('   AND NOT EXISTS (SELECT 1 FROM pendencias WHERE pendencias.NUMOS = mep.numos)                           ');
+  sql.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                   ');
+  sql.Add('   AND NVL(mep.CODROTINA, 0) NOT IN (1709, 1721)                                                          ');
+  sql.Add('   and mep.codrotina = 1723                                                                               ');
+  sql.Add('   order by sep_pendentes.dataonda                                                                        ');
+  sql.Add('     , sep_pendentes.numonda                                                                              ');
+  sql.Add('     , ordem_rua_anterior                                                                                 ');
+  sql.Add('     , ordem_range                                                                                        ');
+  sql.Add('   FOR UPDATE SKIP LOCKED                                                                                 ');
 
   Result := sql.Text;
 
