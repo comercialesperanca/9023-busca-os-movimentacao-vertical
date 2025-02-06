@@ -1011,6 +1011,7 @@ function Criterio11_ProximaOSAbastecimentoPreventivo(aFiltro: TFiltro; aProximaO
 var
   tempo: TDateTime;
   tipo_os: integer;
+  qb: TQueryBuilder;
 begin
 
   // Item 11
@@ -1018,81 +1019,15 @@ begin
   Result := False;
   tempo := Now;
 
+  qb := TQueryBuilder.Create;
+
   with dmdb.qryAuxiliar do
   begin
     Close;
     SQL.Clear;
+    SQL.Add(qb.GetQuery(11, aFiltro));
 
-    SQL.Add(' select                                                                                 ');
-    SQL.Add('   numos,                                                                               ');
-    SQL.Add('   nvl(rua, 0) as rua,                                                                  ');
-    SQL.Add('   nvl(codendereco, 0) as codendereco,                                                  ');
-    SQL.Add('   nvl(codenderecoorig, 0) as codenderecoorig,                                           ');
-    SQL.Add('   nvl(codigouma, 0) as codigouma,                                                       ');
-    SQL.Add('   nvl(tipoos, 0) as tipoos                                                             ');
-    SQL.Add(' from (                                                                                 ');
-    SQL.Add(' Select pcmovendpend.numos                                                              ');
-    SQL.Add('        ,pcendereco.rua                                                                 ');
-    SQL.Add('        , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordemrua          ');
-    SQL.Add('        , pcmovendpend.codendereco                                                      ');
-    SQL.Add('        , pcmovendpend.codenderecoorig                                                  ');
-    SQL.Add('        , nvl(pcest.qtgirodia,0) as giro                                                ');
-    SQL.Add('        , pcmovendpend.codigouma                                                        ');
-    SQL.Add('        , pcmovendpend.tipoos                                                           ');
-    SQL.Add(' from pcmovendpend                                                                      ');
-    SQL.Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig          ');
-    SQL.Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms      ');
-    // SQL.Add('                         AND bodefineondai.numcar = pcmovendpend.numcar ');
-    SQL.Add(' join pcest on pcest.codfilial = pcmovendpend.codfilial                                 ');
-    SQL.Add('     and pcest.codprod = pcmovendpend.codprod                                           ');
-    SQL.Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos            ');
-    SQL.Add('     and booscompendencia.dataliberacao is null                                       ');
-
-    if aFiltro.TipoOperador = tpPaleteiro then
-    begin
-
-      SQL.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P');
-      SQL.Add(' join pcmovendpend mep58 on mep58.data = pcmovendpend.data               ');
-      SQL.Add('  and mep58.codfilial = pcmovendpend.codfilial                           ');
-      SQL.Add('  and mep58.numtranswms = pcmovendpend.numtranswms                       ');
-      SQL.Add('  and mep58.codigouma = pcmovendpend.codigouma                           ');
-      SQL.Add('  and mep58.tipoos = 58                                                  ');
-      SQL.Add('  and mep58.posicao <> ''P''                                             ');
-    end;
-
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
-    SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
-    SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
-    SQL.Add('     and bodefineondai.numtranswms is null                                              ');
-    SQL.Add('     and pcmovendpend.dtestorno is null                                                 ');
-    SQL.Add('     and pcmovendpend.tipoos = :TIPOOS                                                  ');
-    SQL.Add('     and pcmovendpend.codfuncos is null                                                 ');
-    SQL.Add('     and not exists (select bofilaos.numos                                              ');
-    SQL.Add('                              FROM bofilaos                                             ');
-    SQL.Add('                               where bofilaos.numos = pcmovendpend.numos                ');
-    SQL.Add('                               and bofilaos.status in (''E'',''R''))                    ');
-    SQL.Add('                                                                                        ');
-
-    SQL.Add(' 		and not exists (select bofilaosR.numos                                ');
-    SQL.Add(' 		                  FROM bofilaosR                                      ');
-    SQL.Add(' 		                  join bofilaos                                       ');
-    SQL.Add(' 		                    on bofilaosR.senha = bofilaos.senha               ');
-    SQL.Add(' 		                  where bofilaosR.numos = pcmovendpend.numos          ');
-    SQL.Add(' 		                  and bofilaos.status in (''E'',''R''))               ');
-
-    SQL.Add(' AND NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)                    ');
-    SQL.Add(' and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                  ');
-    SQL.Add(' and booscompendencia.numos is null ');
-
-    if (aFiltro.ruasIgnorar.Count > 0) then
-    begin
-
-      SQL.Add(' -- Ruas que serão ignoradas por estarem com excesso de funcionários e do range de exceção caso a exceção não tenha sido informada explicitamente');
-      SQL.Add(' and pcendereco.rua not in (' + aFiltro.ruasIgnorar.DelimitedText + ' )');
-    end;
-
-    SQL.Add(' order by ordemrua, giro desc                                                           ');
-    SQL.Add(' ) where rownum = 1                                                                     ');
+   
 
     // Padrão tpEmpilhador
     tipo_os := 58;
