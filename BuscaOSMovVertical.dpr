@@ -3,13 +3,14 @@ program BuscaOSMovVertical;
 uses
   Forms,
   UVariaveiseFuncoes in 'UVariaveiseFuncoes.pas',
-  UFRMDmdb in 'UFRMDmdb.pas' {dmdb: TDataModule} ,
+  UFRMDmdb in 'UFRMDmdb.pas' {dmdb: TDataModule},
   UHistoricoAlteracoes in 'UHistoricoAlteracoes.pas',
-  uFrmInicial in 'uFrmInicial.pas' {FrmInicial} ,
+  uFrmInicial in 'uFrmInicial.pas' {FrmInicial},
   uProximaOS in '..\LIBS\ConvocacaoAtiva\uProximaOS.pas',
   uConvocacaoAtivaEnums in '..\LIBS\ConvocacaoAtiva\uConvocacaoAtivaEnums.pas',
-  uFrmAnalisesAtribuicao in 'uFrmAnalisesAtribuicao.pas' {frmAnalisesatribuicao} ,
-  ULibrary in '..\LIBSODAC\ULibrary.pas';
+  uFrmAnalisesAtribuicao in 'uFrmAnalisesAtribuicao.pas' {frmAnalisesatribuicao},
+  ULibrary in '..\LIBSODAC\ULibrary.pas',
+  uQueryBuilder in 'uQueryBuilder.pas';
 
 {$R *.res}
 
