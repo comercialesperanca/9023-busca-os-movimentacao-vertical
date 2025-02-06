@@ -9,6 +9,7 @@ type
   private
     function GetQueryCriterio5(filtro: TFiltro): string;
     function GetQueryCriterio6(filtro: TFiltro): string;
+    function GetQueryCriterio7(filtro: TFiltro): string;
   public
     function GetQuery(numero_criterio: integer; filtro: TFiltro): string;
   end;
@@ -16,6 +17,8 @@ type
 implementation
 
 { TQueryBuilder }
+
+uses uConvocacaoAtivaEnums;
 
 function TQueryBuilder.GetQuery(numero_criterio: integer; filtro: TFiltro): string;
 begin
@@ -32,6 +35,12 @@ begin
   begin
 
     Result := self.GetQueryCriterio6(filtro);
+  end;
+
+  if numero_criterio = 7 then
+  begin
+
+    Result := self.GetQueryCriterio7(filtro);
   end;
 
 end;
@@ -202,6 +211,104 @@ begin
 
   sql.Add(' order by ordem1, totalrua desc, pcendereco.rua                                      ');
   sql.Add(' ) where rownum = 1                                                                  ');
+
+  Result := sql.Text;
+
+end;
+
+function TQueryBuilder.GetQueryCriterio7(filtro: TFiltro): string;
+var
+  sql: TStringList;
+  ruasIgnorar, ruasSuperLotadas: string;
+begin
+
+  ruasIgnorar := filtro.ruasIgnorar.DelimitedText;
+  ruasSuperLotadas := filtro.ruasSuperLotadas.DelimitedText;
+
+  sql := TStringList.Create();
+
+  sql.Add(' -- Essa consulta tem uma camada a mais apenas para melhorar performance da consulta nas OS do tipo 61 ');
+
+  sql.Add(' select                                                                                      ');
+  sql.Add('   numos                                                                                     ');
+  sql.Add('   , dataonda                                                                                ');
+  sql.Add('   , nvl(numonda, 0) as numonda                                                              ');
+  sql.Add('   , nvl(numordem, 0) as numordem                                                            ');
+  sql.Add('   , nvl(rua, 0) as rua                                                                      ');
+  sql.Add('   , nvl(codendereco, 0) as codendereco                                                      ');
+  sql.Add('   , nvl(codenderecoorig, 0) as codenderecoorig                                              ');
+  sql.Add('   , nvl(codigouma, 0) as codigouma                                                          ');
+  sql.Add('   , nvl(tipoos, 0) as tipoos                                                                ');
+  sql.Add(' from (                                                                                      ');
+  sql.Add('                                                                                             ');
+  sql.Add(' Select pcmovendpend.numos                                                                   ');
+  sql.Add('        ,bodefineondai.data as dataonda                                                      ');
+  sql.Add('        ,bodefineondai.numonda                                                               ');
+  sql.Add('        ,bodefineondai.numordem                                                              ');
+  sql.Add('        ,pcendereco.rua                                                                      ');
+  sql.Add('        ,pcmovendpend.codendereco                                                            ');
+  sql.Add('        ,pcmovendpend.codenderecoorig                                                        ');
+  sql.Add('        , count(pcmovendpend.numos) over (partition by pcendereco.rua) as totalrua           ');
+  sql.Add('        , pcmovendpend.codigouma                                                             ');
+  sql.Add('        , pcmovendpend.tipoos                                                                ');
+
+  sql.Add(' from pcmovendpend                                                                           ');
+  sql.Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig               ');
+  sql.Add(' left join bopendenciaconf on bopendenciaconf.numos = pcmovendpend.numos                     ');
+  sql.Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms           ');
+  sql.Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                   ');
+  sql.Add('     and booscompendencia.dataliberacao is null                                              ');
+
+  if filtro.TipoOperador = tpPaleteiro then
+  begin
+
+    sql.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
+    sql.Add(' join pcmovendpend mep58 on mep58.data = pcmovendpend.data               ');
+    sql.Add('  and mep58.codfilial = pcmovendpend.codfilial                           ');
+    sql.Add('  and mep58.numtranswms = pcmovendpend.numtranswms                       ');
+    sql.Add('  and mep58.codigouma = pcmovendpend.codigouma                           ');
+    sql.Add('  and mep58.tipoos = 58                                                  ');
+    sql.Add('  and mep58.posicao <> ''P''                                             ');
+  end;
+
+  sql.Add(' where pcmovendpend.data > sysdate - 30                                                      ');
+  sql.Add('     and pcmovendpend.codfilial = :CODFILIAL                                                 ');
+  sql.Add('     and pcmovendpend.posicao = ''P''                                                        ');
+  sql.Add('     and pcmovendpend.dtestorno is null                                                      ');
+  sql.Add('     and pcmovendpend.tipoos = :TIPOOS                                                       ');
+  sql.Add('     and pcmovendpend.codfuncos is null                                                      ');
+  sql.Add('     and not exists (select bofilaos.numos                                                   ');
+  sql.Add('                              FROM bofilaos                                                  ');
+  sql.Add('                               where bofilaos.numos = pcmovendpend.numos                     ');
+  sql.Add('                               and bofilaos.status in (''E'',''R''))                   ');
+
+  sql.Add(' 		and not exists (select bofilaosR.numos                                ');
+  sql.Add(' 		                  FROM bofilaosR                                      ');
+  sql.Add(' 		                  join bofilaos                                       ');
+  sql.Add(' 		                    on bofilaosR.senha = bofilaos.senha               ');
+  sql.Add(' 		                  where bofilaosR.numos = pcmovendpend.numos          ');
+  sql.Add(' 		                  and bofilaos.status in (''E'',''R''))               ');
+
+  sql.Add(' AND NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)                    ');
+  sql.Add(' and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                      ');
+  sql.Add(' and booscompendencia.numos is null ');
+
+  if (filtro.ruasIgnorar.Count > 0) then
+  begin
+
+    sql.Add(' -- Ruas que serão ignoradas por estarem com excesso de funcionários e do range de exceção caso a exceção não tenha sido informada explicitamente');
+    sql.Add(' and pcendereco.rua not in (' + filtro.ruasIgnorar.DelimitedText + ' )');
+  end;
+
+  sql.Add('     and ( bopendenciaconf.numos is not null                      ');
+  sql.Add('     or                                                           ');
+  sql.Add('     exists ( select boetiquetas.codprod                          ');
+  sql.Add('             from boetiquetas                                     ');
+  sql.Add('             where boetiquetas.codprod = pcmovendpend.codprod     ');
+  sql.Add('             and  boetiquetas.pendente = ''S'' ))                 ');
+
+  sql.Add(' order by dataonda, numonda, numordem                                                        ');
+  sql.Add(' ) where rownum = 1                                                                          ');
 
   Result := sql.Text;
 
