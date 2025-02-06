@@ -912,6 +912,7 @@ var
   tipo_os: integer;
   tempo: TDateTime;
   rua_encontrada: double;
+  qb: TQueryBuilder;
 
 begin
   // Item 6.5 (antigo 8.1)
@@ -932,125 +933,13 @@ begin
     Exit;
   end;
 
+  qb := TQueryBuilder.Create;
+
   with dmdb.qryAuxiliar do
   begin
     Close;
     SQL.Clear;
-
-    SQL.Add('  select                                                                                                                                    ');
-    SQL.Add('    numos,                                                                                                                                  ');
-    SQL.Add('    dataonda,                                                                                                                               ');
-    SQL.Add('    nvl(numonda, 0) as numonda,                                                                                                             ');
-    SQL.Add('    nvl(numordem,  0) as numordem,                                                                                                          ');
-    SQL.Add('    nvl(rua, 0) as numrua,                                                                                                                  ');
-    SQL.Add('    tiposervico,                                                                                                                            ');
-    SQL.Add('    nvl(codendereco, 0) as codendereco,                                                                                                     ');
-    SQL.Add('    nvl(codenderecoorig, 0) as codenderecoorig,                                                                                             ');
-    SQL.Add('    nvl(rua, 0) as rua,                                                                                                                     ');
-    SQL.Add('    nvl(codigouma, 0) as codigouma,                                                                                                         ');
-    SQL.Add('    nvl(tipoos, 0) as tipoos                                                                                                                ');
-    SQL.Add('   from (                                                                                                                                   ');
-    SQL.Add('                                                                                                                                            ');
-    SQL.Add(' with carreg_pend as (                                                                                                                      ');
-    SQL.Add('   select mep.numcar, min(mep.data) as data                                                                                                 ');
-    SQL.Add('   from pcmovendpend mep                                                                                                                    ');
-    SQL.Add('   where mep.data > trunc(sysdate - 10)                                                                                                     ');
-    SQL.Add('       and mep.codfilial = :CODFILIAL                                                                                                       ');
-    SQL.Add('       and mep.dtestorno is null                                                                                                            ');
-    SQL.Add('       and mep.posicao = ''P''                                                                                                              ');
-    SQL.Add('   group by mep.numcar                                                                                                                      ');
-    SQL.Add(' ),                                                                                                                                         ');
-    SQL.Add(' carreg_detalhes as (                                                                                                                       ');
-    SQL.Add(' select                                                                                                                                     ');
-    SQL.Add('   mep.numcar                                                                                                                               ');
-    SQL.Add('   , (case when mep.tipoos in (10, 22) then mep.numos else null end ) as os_normal                                                          ');
-    SQL.Add('   , (case when mep.tipoos in (10, 22) and mep.dtfimseparacao is not null then mep.numos else null end ) as os_normal_finalizadas           ');
-    SQL.Add('   , (case when mep.tipoos in (17, 23) then mep.numos else null end ) as os_pallet_box                                                      ');
-    SQL.Add('   , (case when mep.posicao = ''P'' then mep.numos else null end ) as os_pendentes                                                          ');
-    SQL.Add(' from carreg_pend                                                                                                                           ');
-    SQL.Add(' join pcmovendpend mep on mep.numcar = carreg_pend.numcar                                                                                   ');
-    SQL.Add('     where mep.data > trunc(sysdate - 10)                                                                                                   ');
-    SQL.Add('     and mep.codfilial = :CODFILIAL                                                                                                         ');
-    SQL.Add('     and mep.tipoos in (10, 22, 17, 23)                                                                                                     ');
-    SQL.Add('     and mep.dtestorno is null                                                                                                              ');
-    SQL.Add('     ),                                                                                                                                     ');
-    SQL.Add(' carregamentos as (                                                                                                                         ');
-    SQL.Add(' select                                                                                                                                     ');
-    SQL.Add('   carreg_detalhes.numcar                                                                                                                   ');
-    SQL.Add('   , count(distinct carreg_detalhes.os_normal) as quantidade                                                                                ');
-    SQL.Add('   , count(distinct carreg_detalhes.os_normal_finalizadas) as finalizadas                                                                   ');
-    SQL.Add(' from carreg_detalhes                                                                                                                       ');
-    SQL.Add(' group by carreg_detalhes.numcar                                                                                                            ');
-    SQL.Add(' order by numcar)                                                                                                                           ');
-    SQL.Add('                                                                                                                                            ');
-    SQL.Add('  Select pcmovendpend.numos                                                                                                                 ');
-    SQL.Add('           ,bodefineondai.data as dataonda                                                                                                  ');
-    SQL.Add('           ,bodefineondai.numonda                                                                                                           ');
-    SQL.Add('           ,bodefineondai.numordem                                                                                                          ');
-    SQL.Add('           ,pcendereco.rua                                                                                                                  ');
-    SQL.Add('           , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                                                 ');
-    SQL.Add('           , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else pcmovendpend.numos end) ordem_range                    ');
-    SQL.Add('           , (case when pcendereco.rua = :RUAANTERIOR then ''MR'' else ''TR'' end) tiposervico                                              ');
-    SQL.Add('           , pcmovendpend.codendereco                                                                                                       ');
-    SQL.Add('           , pcmovendpend.codenderecoorig                                                                                                   ');
-    SQL.Add('           , pcmovendpend.codigouma                                                                                                         ');
-    SQL.Add('           , pcmovendpend.tipoos                                                                                                            ');
-    SQL.Add('    from pcmovendpend                                                                                                                       ');
-    SQL.Add('    join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco                                                               ');
-    SQL.Add('    left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                                                       ');
-    SQL.Add('    left join carregamentos on carregamentos.numcar = pcmovendpend.numcar                                                                   ');
-    SQL.Add('    left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                                                               ');
-    SQL.Add('        and booscompendencia.dataliberacao is null                                                                                          ');
-
-    if aFiltro.TipoOperador = tpPaleteiro then
-    begin
-
-      SQL.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
-      SQL.Add(' join pcmovendpend mep23 on mep23.data = pcmovendpend.data               ');
-      SQL.Add('  and mep23.codfilial = pcmovendpend.codfilial                           ');
-      SQL.Add('  and mep23.numtranswms = pcmovendpend.numtranswms                       ');
-      SQL.Add('  and mep23.codigouma = pcmovendpend.codigouma                           ');
-      SQL.Add('  and mep23.tipoos = 23                                                  ');
-      SQL.Add('  and mep23.dtfimseparacao is not null                                   ');
-      // sql.Add('  and mep23.posicao <> ''P''                                             ');
-    end;
-
-    SQL.Add('  where pcmovendpend.data > sysdate - 30                                                                                                    ');
-    SQL.Add('      and pcmovendpend.codfilial = :CODFILIAL                                                                                               ');
-    SQL.Add('      and pcmovendpend.posicao = ''P''                                                                                                      ');
-    SQL.Add('      and pcmovendpend.dtestorno is null                                                                                                    ');
-    SQL.Add('      and pcmovendpend.tipoos = :TIPOOS                                                                                                     ');
-    SQL.Add('      and pcmovendpend.codfuncos is null                                                                                                    ');
-    SQL.Add('       AND NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)                    ');
-    SQL.Add('       and not exists (select bofilaos.numos                                                                                                ');
-    SQL.Add('                               FROM bofilaos                                                                                                ');
-    SQL.Add('                                where bofilaos.numos = pcmovendpend.numos                                                                   ');
-    SQL.Add('                                and bofilaos.status in (''E'',''R''))                                                                       ');
-    SQL.Add('  		and not exists (select bofilaosR.numos                                                                                               ');
-    SQL.Add('  		                  FROM bofilaosR                                                                                                     ');
-    SQL.Add('  		                  join bofilaos                                                                                                      ');
-    SQL.Add('  		                    on bofilaosR.senha = bofilaos.senha                                                                              ');
-    SQL.Add('  		                  where bofilaosR.numos = pcmovendpend.numos                                                                         ');
-    SQL.Add('  		                  and bofilaos.status in (''E'',''R''))                                                                              ');
-    SQL.Add('   and booscompendencia.numos is null                                                                                                       ');
-    SQL.Add('   and ( (carregamentos.numcar is null) or (carregamentos.quantidade = carregamentos.finalizadas) or                                        ');
-    SQL.Add('        (nvl(carregamentos.finalizadas,0) > 0                                                                                               ');
-    SQL.Add('          and                                                                                                                               ');
-    SQL.Add('         ((nvl(carregamentos.finalizadas,0) * 100) / carregamentos.quantidade) >= :PERCFINALIZACAO                                          ');
-    SQL.Add('        ))                                                                                                                                  ');
-
-    if (aFiltro.ruasIgnorar.Count > 0) then
-    begin
-
-      SQL.Add(' -- Ruas que serão ignoradas por estarem com excesso de funcionários e do range de exceção caso a exceção não tenha sido informada explicitamente');
-      SQL.Add(' and pcendereco.rua not in (' + aFiltro.ruasIgnorar.DelimitedText + ' )');
-    end;
-
-    SQL.Add('    order by dataonda, numonda, ordem_range, ordem_rua_anterior, pcendereco.rua, pcmovendpend.numos                                         ');
-    SQL.Add(' ) where rownum = 1                                                                                                                         ');
-
-
-    // Clipboard.AsText := sql.Text;
+    SQL.Add(qb.GetQuery(6.5, aFiltro));
 
     // Padrão tpEmpilhador
     tipo_os := 23;
@@ -1114,23 +1003,6 @@ begin
 
         aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
       end;
-
-      // processando abastecimento consolidado
-      // Jhonny - 10/07/2020
-      // A partir da versão 6.0.0.0 - Não são mais consolidados OSs dos tipos 17 e 23
-      // if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS, aFiltro.Filial, true) then
-      // begin
-      //
-      // aProximaOS.NumeroOS := 0;
-      // aProximaOS.TipoServico := 'OC';
-      //
-      // if not GravarOSsAbastecimentoConsolidado(aFiltro.Senha, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS, aFiltro.Filial, true) then
-      // begin
-      //
-      // Result := False;
-      // Exit;
-      // end;
-      // end;
 
       Result := True;
     end;
