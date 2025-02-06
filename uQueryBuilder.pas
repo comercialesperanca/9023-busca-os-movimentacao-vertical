@@ -13,6 +13,7 @@ type
     function GetQueryCriterio7(filtro: TFiltro): string;
     function GetQueryCriterio8(filtro: TFiltro): string;
     function GetQueryCriterio8_2(filtro: TFiltro): string;
+    function GetQueryCriterio9_5(filtro: TFiltro): string;
 
   public
     function GetQuery(numero_criterio: double; filtro: TFiltro): string;
@@ -63,6 +64,12 @@ begin
   begin
 
     Result := self.GetQueryCriterio8_2(filtro);
+  end;
+
+  if numero_criterio = 9.5 then
+  begin
+
+    Result := self.GetQueryCriterio9_5(filtro);
   end;
 
 end;
@@ -648,6 +655,91 @@ begin
   sql.Add('     , ordem_rua_anterior                                                                                 ');
   sql.Add('     , ordem_range                                                                                        ');
   sql.Add('   FOR UPDATE SKIP LOCKED                                                                                 ');
+
+  Result := sql.Text;
+
+end;
+
+function TQueryBuilder.GetQueryCriterio9_5(filtro: TFiltro): string;
+var
+  sql: TStringList;
+begin
+
+  sql := TStringList.Create();
+
+  sql.Add('select                                                                                                      ');
+  sql.Add('   numos,                                                                                                   ');
+  sql.Add('   rua,                                                                                                     ');
+  sql.Add('   codendereco,                                                                                             ');
+  sql.Add('   codigouma,                                                                                               ');
+  sql.Add('   codenderecoorig,                                                                                         ');
+  sql.Add('   tipoos,                                                                                                  ');
+  sql.Add('   0 as numonda                                                                                             ');
+  sql.Add(' from (                                                                                                     ');
+  sql.Add('                                                                                                            ');
+  sql.Add('   select                                                                                                   ');
+  sql.Add('     mep.numos                                                                                              ');
+  sql.Add('     , pcendereco.rua                                                                                       ');
+  sql.Add('     , pcendereco.codendereco                                                                               ');
+  sql.Add('     , mep.codigouma                                                                                        ');
+  sql.Add('     , mep.codenderecoorig                                                                                  ');
+  sql.Add('     , mep.tipoos                                                                                           ');
+  sql.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                       ');
+  sql.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range   ');
+  sql.Add('   from pcmovendpend mep                                                                                    ');
+  sql.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                   ');
+  sql.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                              ');
+
+  if filtro.TipoOperador = tpPaleteiro then
+  begin
+
+    sql.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
+    sql.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
+    sql.Add('  and mep58.codfilial = mep.codfilial                           ');
+    sql.Add('  and mep58.numtranswms = mep.numtranswms                       ');
+    sql.Add('  and mep58.codigouma = mep.codigouma                           ');
+    sql.Add('  and mep58.tipoos = 58                                         ');
+    sql.Add('  and mep58.posicao <> ''P''                                    ');
+  end;
+
+  sql.Add('                                                                                                            ');
+  sql.Add('                                                                                                            ');
+  sql.Add('   where mep.data >= trunc(sysdate - 30)                                                                    ');
+  sql.Add('   and mep.codfilial = :CODFILIAL                                                                           ');
+  sql.Add('   and mep.posicao = ''P''                                                                                  ');
+  sql.Add('   and mep.dtestorno is null                                                                                ');
+  sql.Add('   and mep.codfuncos is null                                                                                ');
+  sql.Add('   and mep.tipoos = :TIPOOS                                                                                 ');
+  sql.Add('   and pcwms.numtranswms is null                                                                            ');
+  sql.Add('   and not exists (select bofilaos.numos                                                                    ');
+  sql.Add('         FROM bofilaos where bofilaos.numos = mep.numos                                                     ');
+  sql.Add('         and bofilaos.status in (''E'',''R''))                                                              ');
+  sql.Add('                                                                                                            ');
+  sql.Add('   and not exists (select bofilaosR.numos                                                                   ');
+  sql.Add('                     FROM bofilaosR                                                                         ');
+  sql.Add('                     join bofilaos                                                                          ');
+  sql.Add('                       on bofilaosR.senha = bofilaos.senha                                                  ');
+  sql.Add('                     where bofilaosR.numos = mep.numos                                                      ');
+  sql.Add('                     and bofilaos.status in (''E'',''R''))                                                  ');
+  sql.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                     ');
+  sql.Add('                                                                                                            ');
+  sql.Add('                                                                                                            ');
+  sql.Add(' and not exists (select pend.numos from booscompendencia pend                                               ');
+  sql.Add('                 join pcmovendpend on pcmovendpend.numos = pend.numos                                       ');
+  sql.Add('                 where pend.dataliberacao is null                                                           ');
+  sql.Add('                 and pcmovendpend.codprod = mep.codprod )                                                   ');
+  sql.Add('                                                                                                            ');
+  sql.Add('  and mep.codrotina = 1752                                                                                  ');
+  sql.Add('   group by mep.numos                                                                                       ');
+  sql.Add('     , pcendereco.rua                                                                                       ');
+  sql.Add('     , pcendereco.codendereco                                                                               ');
+  sql.Add('     , mep.codigouma                                                                                        ');
+  sql.Add('     , mep.codenderecoorig                                                                                  ');
+  sql.Add('     , mep.tipoos                                                                                           ');
+  sql.Add('                                                                                                            ');
+  sql.Add('   order by ordem_rua_anterior                                                                              ');
+  sql.Add('     , ordem_range                                                                                          ');
+  sql.Add(' ) where rownum = 1                                                                                         ');
 
   Result := sql.Text;
 
