@@ -552,6 +552,7 @@ end;
 function Criterio6_ProximaOSAbastecimentoQualquerRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
+  qb : TQueryBuilder;
 begin
 
   // Item 6
@@ -572,76 +573,14 @@ begin
     Exit;
   end;
 
+  qb :=TQueryBuilder.Create();
+
   with dmdb.qryAuxiliar do
   begin
 
     Close;
     SQL.Clear;
-    SQL.Add(' select                                                                              ');
-    SQL.Add('   numos,                                                                            ');
-    SQL.Add('   codendereco,                                                                      ');
-    SQL.Add('   codigouma,                                                                        ');
-    SQL.Add('   rua,                                                                              ');
-    SQL.Add('   codenderecoorig,                                                                  ');
-    SQL.Add('   tipoos                                                                            ');
-    SQL.Add(' from (                                                                              ');
-    SQL.Add(' Select pcmovendpend.numos                                                           ');
-    SQL.Add('        , pcmovendpend.data                                                          ');
-    SQL.Add('        , count(pcmovendpend.numos) over (partition by pcendereco.rua ) as totalrua  ');
-    SQL.Add('        , pcmovendpend.codendereco                                                   ');
-    SQL.Add('        , pcmovendpend.codigouma                                                     ');
-    SQL.Add('        , pcendereco.rua                                                             ');
-    SQL.Add('        , pcmovendpend.codenderecoorig                                               ');
-    SQL.Add('        , pcmovendpend.tipoos                                                        ');
-    SQL.Add('        , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) as ordem1      ');
-    SQL.Add(' from pcmovendpend                                                                   ');
-    SQL.Add(' join pcendereco on pcendereco.codendereco = pcmovendpend.codendereco                ');
-    SQL.Add(' join pcmovendpend mep97 on pcmovendpend.codigouma = mep97.codigouma                 ');
-    SQL.Add('                             and mep97.tipoos = 97                                   ');
-    SQL.Add('                             and mep97.numtranswms = pcmovendpend.numtranswms        ');
-    SQL.Add('                             and mep97.dtfimos is not null                           ');
-    SQL.Add('                                                                                     ');
-    SQL.Add(' where pcmovendpend.data > sysdate - 30                                               ');
-    SQL.Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
-    SQL.Add('     and pcmovendpend.posicao = ''P''                                                 ');
-    SQL.Add('     and pcmovendpend.dtestorno is null                                              ');
-    SQL.Add('     and pcmovendpend.tipoos = 98                                                    ');
-    SQL.Add('     and pcmovendpend.codfuncos is null                                              ');
-    SQL.Add('     and not exists (select bofilaos.numos                                           ');
-    SQL.Add(' 			FROM bofilaos where bofilaos.numos = pcmovendpend.numos                       ');
-    SQL.Add(' 			and bofilaos.status in (''E'',''R''))                                         ');
-
-    SQL.Add(' 		and not exists (select bofilaosR.numos                                ');
-    SQL.Add(' 		                  FROM bofilaosR                                      ');
-    SQL.Add(' 		                  join bofilaos                                       ');
-    SQL.Add(' 		                    on bofilaosR.senha = bofilaos.senha               ');
-    SQL.Add(' 		                  where bofilaosR.numos = pcmovendpend.numos          ');
-    SQL.Add(' 		                  and bofilaos.status in (''E'',''R''))               ');
-
-    SQL.Add(' AND NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)                    ');
-    SQL.Add(' and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                      ');
-
-    if (aFiltro.ruasIgnorar.Count > 0) then
-    begin
-
-      SQL.Add(' -- Ruas que serão ignoradas por estarem com excesso de funcionários e do range de exceção caso a exceção não tenha sido informada explicitamente');
-      SQL.Add(' and pcendereco.rua not in (' + aFiltro.ruasIgnorar.DelimitedText + ' )');
-    end;
-
-    if (aFiltro.ruasSuperLotadas.Count > 0) then
-    begin
-
-      SQL.Add(' -- Ruas superlotadas de OS ');
-      SQL.Add(' and pcendereco.rua in (' + aFiltro.ruasSuperLotadas.DelimitedText + ' )');
-    end;
-
-    SQL.Add(' and not exists (select pend.numos from booscompendencia pend ');
-    SQL.Add('                 join pcmovendpend mep on mep.numos = pend.numos ');
-    SQL.Add('                 where pend.dataliberacao is null ');
-    SQL.Add('                 and mep.codprod = pcmovendpend.codprod ) ');
-
-    SQL.Add(' order by ordem1, totalrua desc, pcendereco.rua                                      ');
-    SQL.Add(' ) where rownum = 1                                                                  ');
+    SQL.Add(qb.GetQuery(6, aFiltro));
 
     ParamByName('CODFILIAL').AsString := aFiltro.Filial;
     ParamByName('RUAINICIAL').AsFloat := aFiltro.RuaInicial;
