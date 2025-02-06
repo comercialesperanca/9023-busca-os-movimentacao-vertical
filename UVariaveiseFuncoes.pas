@@ -354,7 +354,7 @@ begin
   Result := ruas_excluidas;
 end;
 
-function ProximaOSAbastecimentoNaRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio5_ProximaOSAbastecimentoNaRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
   ruasIgnorar, ruasSuperLotadas: string;
@@ -504,7 +504,7 @@ begin
   end;
 end;
 
-function ProximaOSAbastecimento(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio10_ProximaOSAbastecimento(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
   ruasIgnorar, ruasSuperLotadas: string;
@@ -513,7 +513,7 @@ begin
   ruasIgnorar := aFiltro.ruasIgnorar.DelimitedText;
   ruasSuperLotadas := aFiltro.ruasSuperLotadas.DelimitedText;
 
-  // Item 10
+  // Critério 10
 
   Result := False;
   tempo := Now;
@@ -632,7 +632,7 @@ begin
   end;
 end;
 
-function ProximaOSAbastecimentoQualquerRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio6_ProximaOSAbastecimentoQualquerRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
 begin
@@ -766,7 +766,7 @@ begin
   end;
 end;
 
-function ProximaOSPendenciaAbastecimentoCorretivo(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tipo_os: integer;
   tempo: TDateTime;
@@ -812,7 +812,6 @@ begin
     SQL.Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig               ');
     SQL.Add(' left join bopendenciaconf on bopendenciaconf.numos = pcmovendpend.numos                     ');
     SQL.Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms           ');
-    // SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                   ');
     SQL.Add('     and booscompendencia.dataliberacao is null                                              ');
 
@@ -941,7 +940,7 @@ begin
 
 end;
 
-function ProximaOSUltimaRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio8_ProximaOSUltimaRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tipo_os: integer;
   tempo: TDateTime;
@@ -1131,7 +1130,7 @@ begin
 
 end;
 
-function ProximaOSPalletBox(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio6_5_ProximaOSPalletBox(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tipo_os: integer;
   tempo: TDateTime;
@@ -1222,7 +1221,6 @@ begin
     SQL.Add('    from pcmovendpend                                                                                                                       ');
     SQL.Add('    join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco                                                               ');
     SQL.Add('    left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                                                       ');
-    // SQL.Add('               AND bodefineondai.numcar = pcmovendpend.numcar ');
     SQL.Add('    left join carregamentos on carregamentos.numcar = pcmovendpend.numcar                                                                   ');
     SQL.Add('    left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                                                               ');
     SQL.Add('        and booscompendencia.dataliberacao is null                                                                                          ');
@@ -1366,7 +1364,7 @@ begin
 
 end;
 
-function ProximaOSAbastecimentoPreventivoSemOnda(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
   tipo_os: integer;
@@ -1474,126 +1472,6 @@ begin
         SQL.Add('     , ordem_range                                                                                        ');
         SQL.Add('   FOR UPDATE SKIP LOCKED                                                                                 ');
 
-
-        // Trecho comentado para teste com for update skip locked
-        // SQL.Add(' select                                                                                                              ');
-        // SQL.Add('   numos,                                                                                                            ');
-        // SQL.Add('   rua,                                                                                                              ');
-        // SQL.Add('   codendereco,                                                                                                      ');
-        // SQL.Add('   codigouma,                                                                                                        ');
-        // SQL.Add('   codenderecoorig,                                                                                                  ');
-        // SQL.Add('   tipoos,                                                                                                           ');
-        // SQL.Add('   dataonda,                                                                                                         ');
-        // SQL.Add('   numonda                                                                                                           ');
-        // SQL.Add(' from (                                                                                                              ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add(' with sep_pendentes as                                                                                               ');
-        // SQL.Add(' (                                                                                                                   ');
-        // SQL.Add('    select                                                                                                           ');
-        // SQL.Add('     pcmovendpend.codendereco                                                                                        ');
-        // SQL.Add('     , bodefineondai.data as dataonda                                                                                ');
-        // SQL.Add('     , bodefineondai.numonda                                                                                         ');
-        // SQL.Add('     , bodefineondai.numordem                                                                                        ');
-        // SQL.Add('   from pcmovendpend                                                                                                 ');
-        // SQL.Add('   join bodefineondai  on bodefineondai.numtranswms = pcmovendpend.numtranswms                                       ');
-        // SQL.Add('                       and bodefineondai.data >= pcmovendpend.data                                                   ');
-        // SQL.Add('   where pcmovendpend.data >= trunc(sysdate - 10)                                                                    ');
-        // SQL.Add('   and pcmovendpend.codfilial = :CODFILIAL                                                                           ');
-        // SQL.Add('   and pcmovendpend.posicao = ''P''                                                                                  ');
-        // SQL.Add('   and pcmovendpend.dtestorno is null                                                                                ');
-        // SQL.Add('   and pcmovendpend.codfuncos is null                                                                                ');
-        // SQL.Add('   and pcmovendpend.tipoos in (10, 22)                                                                               ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('   group by   bodefineondai.data                                                                                     ');
-        // SQL.Add('     , bodefineondai.numonda                                                                                         ');
-        // SQL.Add('     , bodefineondai.numordem                                                                                        ');
-        // SQL.Add('     , pcmovendpend.codendereco                                                                                      ');
-        // SQL.Add('   order by bodefineondai.data                                                                                       ');
-        // SQL.Add('     , bodefineondai.numonda                                                                                         ');
-        // SQL.Add('     , bodefineondai.numordem                                                                                        ');
-        // SQL.Add(' ),                                                                                                                  ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add(' fila_execucao as (                                                                                                  ');
-        // SQL.Add('   select bofilaos.numos                                                                                             ');
-        // SQL.Add('   FROM bofilaos                                                                                                     ');
-        // SQL.Add('   where bofilaos.status in (''E'',''R'')                                                                            ');
-        // SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                                 ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('   union all                                                                                                         ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('   select bofilaosR.numos                                                                                            ');
-        // SQL.Add('   FROM bofilaosR                                                                                                    ');
-        // SQL.Add('   join bofilaos on bofilaosR.senha = bofilaos.senha                                                                 ');
-        // SQL.Add('   where  bofilaos.status in (''E'',''R'')                                                                           ');
-        // SQL.Add('   and bofilaos.dtsolicitacao >= trunc(sysdate - 15)                                                                 ');
-        // SQL.Add(' ),                                                                                                                  ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add(' pendencias as (                                                                                                     ');
-        // SQL.Add('   select pend.numos                                                                                                 ');
-        // SQL.Add('   from booscompendencia pend                                                                                        ');
-        // SQL.Add('   where pend.datainclusao >= trunc(sysdate -  10)                                                                   ');
-        // SQL.Add('   and pend.dataliberacao is null                                                                                    ');
-        // SQL.Add(' )                                                                                                                   ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('   select                                                                                                            ');
-        // SQL.Add('     mep.numos                                                                                                       ');
-        // SQL.Add('     , pcendereco.rua                                                                                                ');
-        // SQL.Add('     , pcendereco.codendereco                                                                                        ');
-        // SQL.Add('     , mep.codigouma                                                                                                 ');
-        // SQL.Add('     , mep.codenderecoorig                                                                                           ');
-        // SQL.Add('     , mep.tipoos                                                                                                    ');
-        // SQL.Add('     , sep_pendentes.dataonda                                                                                        ');
-        // SQL.Add('     , sep_pendentes.numonda                                                                                         ');
-        // SQL.Add('     , (case when pcendereco.rua = :RUAANTERIOR then 0 else 1 end) ordem_rua_anterior                                ');
-        // SQL.Add('     , (case when pcendereco.rua between :RUAINICIAL and :RUAFINAL then 0 else mep.numos end) ordem_range            ');
-        // SQL.Add('   from pcmovendpend mep                                                                                             ');
-        // SQL.Add('   left join pcwms on pcwms.numtranswms = mep.numtranswms                                                            ');
-        // SQL.Add('   join pcendereco on pcendereco.codendereco = mep.codendereco                                                       ');
-        // SQL.Add('   join sep_pendentes on sep_pendentes.codendereco = mep.codendereco                                                 ');
-        // SQL.Add('   left join fila_execucao on fila_execucao.numos = mep.numos                                                        ');
-        // SQL.Add('   left join pendencias on pendencias.numos = mep.numos                                                              ');
-        //
-        // if aFiltro.TipoOperador = tpPaleteiro then
-        // begin
-        //
-        // SQL.Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P      ');
-        // SQL.Add(' join pcmovendpend mep58 on mep58.data = mep.data               ');
-        // SQL.Add('  and mep58.codfilial = mep.codfilial                           ');
-        // SQL.Add('  and mep58.numtranswms = mep.numtranswms                       ');
-        // SQL.Add('  and mep58.codigouma = mep.codigouma                           ');
-        // SQL.Add('  and mep58.tipoos = 58                                         ');
-        // SQL.Add('  and mep58.posicao <> ''P''                                    ');
-        // end;
-        //
-        // SQL.Add('   where mep.data >= trunc(sysdate - 15)                                                                             ');
-        // SQL.Add('   and mep.codfilial = :CODFILIAL                                                                                    ');
-        // SQL.Add('   and mep.posicao = ''P''                                                                                           ');
-        // SQL.Add('   and mep.dtestorno is null                                                                                         ');
-        // SQL.Add('   and mep.codfuncos is null                                                                                         ');
-        // SQL.Add('   and mep.tipoos = :TIPOOS                                                                                          ');
-        // SQL.Add('   and pcwms.numtranswms is null                                                                                     ');
-        // SQL.Add('   and fila_execucao.numos is null                                                                                   ');
-        // SQL.Add('   and pendencias.numos is null                                                                                      ');
-        // SQL.Add('   and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                                              ');
-        // SQL.Add('   AND NVL(mep.CODROTINA, 0) NOT IN (1709, 1721)                                                                     ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('  and mep.codrotina = 1723                                                                                           ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('   group by mep.numos                                                                                                ');
-        // SQL.Add('     , pcendereco.rua                                                                                                ');
-        // SQL.Add('     , pcendereco.codendereco                                                                                        ');
-        // SQL.Add('     , mep.codigouma                                                                                                 ');
-        // SQL.Add('     , mep.codenderecoorig                                                                                           ');
-        // SQL.Add('     , mep.tipoos                                                                                                    ');
-        // SQL.Add('     , sep_pendentes.dataonda                                                                                        ');
-        // SQL.Add('     , sep_pendentes.numonda                                                                                         ');
-        // SQL.Add('                                                                                                                     ');
-        // SQL.Add('   order by sep_pendentes.dataonda                                                                                   ');
-        // SQL.Add('     , sep_pendentes.numonda                                                                                         ');
-        // SQL.Add('     , ordem_rua_anterior                                                                                            ');
-        // SQL.Add('     , ordem_range                                                                                                   ');
-        // SQL.Add(' ) where rownum = 1                                                                                                  ');
-
         // Padrão tpEmpilhador
         tipo_os := 58;
 
@@ -1697,7 +1575,7 @@ begin
 
 end;
 
-function ProximaOSAbastecimentoPreventivo(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio11_ProximaOSAbastecimentoPreventivo(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
   tipo_os: integer;
@@ -1852,7 +1730,7 @@ begin
 
 end;
 
-function ProximaOSCorretivaBaseadaEmPedido(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+function Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
   tipo_os: integer;
@@ -1861,6 +1739,10 @@ begin
 
   // Critério 9.5
   Result := False;
+
+  Log('O critério 9.5 foi desabilitado');
+  Exit;
+
   tempo := Now;
 
   with dmdb.qryAuxiliar do
@@ -2273,8 +2155,6 @@ begin
   dmdb.qryCarregarSolicitacoes.Close;
   dmdb.qryCarregarSolicitacoes.Open;
 
-  // dmdb.qryCarregarSolicitacoes.FetchAll;
-
   if dmdb.qryCarregarSolicitacoes.RecordCount = 0 then
   begin
 
@@ -2282,8 +2162,6 @@ begin
     dmdb.qryCarregarSolicitacoes.Close;
     Exit;
   end;
-
-  // BDEDatabase.StartTransaction;
 
   try
     begin
@@ -2406,10 +2284,10 @@ begin
         // Com as ruas definidas pelo usuário
 
         // Item 5 - Se o funcionário estava em uma rua super lotada, vai continuar nela até a rua sair dessa situação
-        Log('Analisando critério 5 - Senha: ' + FloatToStr(Senha));
+        Log('(Ordem 5) Analisando critério 5 - Senha: ' + FloatToStr(Senha));
         if (filtro.RuaSuperLotadaAntes) then
         begin
-          if ProximaOSAbastecimentoNaRua(filtro, proxima_os) then
+          if Criterio5_ProximaOSAbastecimentoNaRua(filtro, proxima_os) then
           begin
 
             Log('CRITÉRIO 5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2421,8 +2299,8 @@ begin
         end;
 
         // Item 6 - Verificando ruas super lotadas mas priorizando as ruas com maior quantidade de OS pendentes
-        Log('Analisando critério 6 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimentoQualquerRua(filtro, proxima_os) then
+        Log('(Ordem 6) Analisando critério 6 - Senha: ' + FloatToStr(Senha));
+        if Criterio6_ProximaOSAbastecimentoQualquerRua(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2433,8 +2311,8 @@ begin
         end;
 
         // Item 6.5 - Separação, processo conhecido como Pallet Box
-        Log('Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSPalletBox(filtro, proxima_os) then
+        Log('(Ordem 7) Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
+        if Criterio6_5_ProximaOSPalletBox(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2444,13 +2322,9 @@ begin
           continue;
         end;
 
-        // debug
-        // dmdb.qryCarregarSolicitacoes.Next;
-        // continue;
-
         // Item 7 - OS de abastecimento corretivo mas com pendências
-        Log('Analisando critério 7 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSPendenciaAbastecimentoCorretivo(filtro, proxima_os) then
+        Log('(Ordem 8) Analisando critério 7 - Senha: ' + FloatToStr(Senha));
+        if Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 7: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2461,8 +2335,8 @@ begin
         end;
 
         // Item 8 - Pesquisando OS normalmente, sem super lotação, priorizando onda e rua que ele estava antes
-        Log('Analisando critério 8 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSUltimaRua(filtro, proxima_os) then
+        Log('(Ordem 9) Analisando critério 8 - Senha: ' + FloatToStr(Senha));
+        if Criterio8_ProximaOSUltimaRua(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2472,7 +2346,19 @@ begin
           continue;
         end;
 
-        // // Item 8.1 - Separação, processo conhecido como Pallet Box
+        // Item 10 - Armazenamento comum
+        Log('(Ordem 10) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
+        if Criterio10_ProximaOSAbastecimento(filtro, proxima_os) then
+        begin
+
+          Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+            FloatToStr(Matricula));
+          AtenderSolicitacao(filtro, proxima_os);
+          dmdb.qryCarregarSolicitacoes.Next;
+          continue;
+        end;
+
+        // Item 8.1 - Separação, processo conhecido como Pallet Box
         // Log('Analisando critério 8.1 - Senha: ' + FloatToStr(senha));
         // if ProximaOSPalletBox(filtro, proxima_os) then
         // begin
@@ -2484,8 +2370,8 @@ begin
         // end;
 
         // Item 8.2 - Abastecimento preventivo sem onda
-        Log('Analisando critério 8.2 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimentoPreventivoSemOnda(filtro, proxima_os) then
+        Log('(Ordem 11) Analisando critério 8.2 - Senha: ' + FloatToStr(Senha));
+        if Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8.2: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2497,13 +2383,14 @@ begin
 
         // Item 9 - Daqui em diante, as mesmas pesquisas anteriores mas buscando o galpão todo
 
+        Log('(Ordem 12) CRITÉRIO 10 - A pesquisa passa a ser no armazém todo');
         filtro.BuscarNoArmazemTodo := True;
 
         // Item 5 - Se o funcionário estava em uma rua super lotada, vai continuar nela até a rua sair dessa situação (Armazém todo)
-        Log('Analisando critério 5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        Log('(Ordem 13) Analisando critério 5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
         if filtro.RuaSuperLotadaAntes then
         begin
-          if ProximaOSAbastecimentoNaRua(filtro, proxima_os) then
+          if Criterio5_ProximaOSAbastecimentoNaRua(filtro, proxima_os) then
           begin
 
             Log('CRITÉRIO 5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2515,8 +2402,8 @@ begin
         end;
 
         // Item 6 - Verificando ruas super lotadas mas priorizando as ruas com maior quantidade de OS pendentes (Armazém todo)
-        Log('Analisando critério 6 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimentoQualquerRua(filtro, proxima_os) then
+        Log('(Ordem 14) Analisando critério 6 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio6_ProximaOSAbastecimentoQualquerRua(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2527,8 +2414,8 @@ begin
         end;
 
         // Item 6.5 - Separação, processo conhecido como Pallet Box
-        Log('Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSPalletBox(filtro, proxima_os) then
+        Log('(Ordem 15) Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
+        if Criterio6_5_ProximaOSPalletBox(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2539,8 +2426,8 @@ begin
         end;
 
         // Item 7 - OS de abastecimento corretivo mas com pendências (Armazém todo)
-        Log('Analisando critério 7 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSPendenciaAbastecimentoCorretivo(filtro, proxima_os) then
+        Log('(Ordem 16) Analisando critério 7 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 7 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2551,8 +2438,8 @@ begin
         end;
 
         // Item 8 - Pesquisando OS normalmente, sem super lotação, priorizando onda e rua que ele estava antes (Armazém todo)
-        Log('Analisando critério 8 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSUltimaRua(filtro, proxima_os) then
+        Log('(Ordem 17) Analisando critério 8 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio8_ProximaOSUltimaRua(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2574,8 +2461,8 @@ begin
         // end;
 
         // Item 8.2 - Abastecimento preventivo sem onda (Armazém todo)
-        Log('Analisando critério 8.2 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimentoPreventivoSemOnda(filtro, proxima_os) then
+        Log('(Ordem 18) Analisando critério 8.2 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8.2 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2588,11 +2475,12 @@ begin
 
         // Voltando a considerar apenas as ruas que o usuário informou
 
+        Log('(Ordem 19) A pesquisa volta a ser pelo intervalo definido pelo separador');
         filtro.BuscarNoArmazemTodo := False;
 
         // Item 9.5 - O.S. preventiva baseadas em pedidos
-        Log('Analisando critério 9.5 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSCorretivaBaseadaEmPedido(filtro, proxima_os) then
+        Log('(Ordem 20) Analisando critério 9.5 - Senha: ' + FloatToStr(Senha));
+        if Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 9.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2602,21 +2490,21 @@ begin
           continue;
         end;
 
-        // Item 10 - Armazenamento comum
-        Log('Analisando critério 10 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimento(filtro, proxima_os) then
-        begin
-
-          Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-            FloatToStr(Matricula));
-          AtenderSolicitacao(filtro, proxima_os);
-          dmdb.qryCarregarSolicitacoes.Next;
-          continue;
-        end;
+//        // Item 10 - Armazenamento comum
+//        Log('(Ordem 19) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
+//        if ProximaOSAbastecimento(filtro, proxima_os) then
+//        begin
+//
+//          Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+//            FloatToStr(Matricula));
+//          AtenderSolicitacao(filtro, proxima_os);
+//          dmdb.qryCarregarSolicitacoes.Next;
+//          continue;
+//        end;
 
         // Item 11 - Abastecimento preventivo
-        Log('Analisando critério 11 - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimentoPreventivo(filtro, proxima_os) then
+        Log('(Ordem 21) Analisando critério 11 - Senha: ' + FloatToStr(Senha));
+        if Criterio11_ProximaOSAbastecimentoPreventivo(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 11: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2628,12 +2516,12 @@ begin
 
 
         // Item 12 - Mesmas coisas mas com galpão inteiro
-
+         Log('(Ordem 22) CRITÉRIO 12: A pesquisa passa a ser no armazém todo novamente');
         filtro.BuscarNoArmazemTodo := True;
 
         // Item 9.5 - O.S. preventiva baseadas em pedidos (Armazém todo)
-        Log('Analisando critério 9.5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSCorretivaBaseadaEmPedido(filtro, proxima_os) then
+        Log('(Ordem 23) Analisando critério 9.5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 9.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2644,8 +2532,8 @@ begin
         end;
 
         // Item 10 - Armazenamento comum (Armazém todo)
-        Log('Analisando critério 10 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimento(filtro, proxima_os) then
+        Log('(Ordem 24) Analisando critério 10 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio10_ProximaOSAbastecimento(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 10 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -2656,8 +2544,8 @@ begin
         end;
 
         // Item 11 - Abastecimento preventivo (Armazém todo)
-        Log('Analisando critério 11 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if ProximaOSAbastecimentoPreventivo(filtro, proxima_os) then
+        Log('(Ordem 25) Analisando critério 11 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if Criterio11_ProximaOSAbastecimentoPreventivo(filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 11 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +

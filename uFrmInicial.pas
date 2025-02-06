@@ -193,20 +193,6 @@ begin
 
         AtenderSolicitacoes('2', CONFIG, chkRegistrarLogs.Checked);
 
-        { teste para verificar as queries que ficaram abertas }
-        // for I := 0 to dmdb.ComponentCount - 1 do
-        // begin
-        // if (dmdb.Components[I] is TOraQuery) then
-        // begin
-        // if (TOraQuery(dmdb.Components[I]).Active = true) then
-        // begin
-        //
-        // ShowMessage(TOraQuery(dmdb.Components[I]).Name);
-        //
-        // end;
-        // end;
-        // end;
-
       end;
     except
       on E: Exception do
