@@ -10,7 +10,11 @@ uses
   uConvocacaoAtivaEnums in '..\LIBS\ConvocacaoAtiva\uConvocacaoAtivaEnums.pas',
   uFrmAnalisesAtribuicao in 'uFrmAnalisesAtribuicao.pas' {frmAnalisesatribuicao},
   ULibrary in '..\LIBSODAC\ULibrary.pas',
-  uQueryBuilder in 'uQueryBuilder.pas';
+  uQueryBuilder in 'uQueryBuilder.pas',
+  uFrmSimulacao in 'uFrmSimulacao.pas' {FrmSimulacao},
+  UMensagens in '..\LIBS\UMensagens.pas',
+  uFrmExplicacaoRuasIgnorar in 'uFrmExplicacaoRuasIgnorar.pas' {FrmExplicacaoRuasIgnorar},
+  uFrmExplicacaoRuasExcessoOS in 'uFrmExplicacaoRuasExcessoOS.pas' {FrmExplicacaoRuasExcessoOS};
 
 {$R *.res}
 

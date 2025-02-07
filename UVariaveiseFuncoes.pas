@@ -8,6 +8,12 @@ Uses
     ;
 
 type
+  TProcessadorCriterio = class
+  public
+    function executar(codigo_criterio: double; filtro: TFiltro; proximaOS: TProximaOS): boolean;
+  end;
+
+type
   TConfiguracoes = class
   public
     ruas_excecao_248: TStringList;
@@ -60,9 +66,7 @@ begin
 
   logs := logs + 1;
   processo_atual := aMensagem;
-  // FrmInicial.memo.Lines.Add( IntToStr(FrmInicial.memo.Lines.Count + 1) + ') ' + DateTimeToStr(Now) + ': ' + aMensagem);
   FrmInicial.memo.Lines.Add(FloatToStr(logs) + ') ' + DateTimeToStr(Now) + ': ' + aMensagem);
-  // Application.ProcessMessages;
 end;
 
 procedure CancelarSolicitacoesAbandonadas(aFilial: string; aConfig: TConfiguracoes);
@@ -125,7 +129,6 @@ begin
     begin
 
       SQL.Add(' join bodefineondai ON bodefineondai.numtranswms = pcmovendpend.numtranswms ');
-      // SQL.Add('     AND bodefineondai.numcar = pcmovendpend.numcar ');
     end;
 
     SQL.Add(' WHERE    pcmovendpend.posicao = ''P''                                          ');
@@ -183,15 +186,6 @@ begin
 
   end;
 
-
-  // dmdb.qryOSsMesmoEnderecoOrigem.Close;
-  // dmdb.qryOSsMesmoEnderecoOrigem.ParamByName('CODFILIAL').AsString := aFilial;
-  // dmdb.qryOSsMesmoEnderecoOrigem.ParamByName('TIPOOS').AsFloat := aTipoOS;
-  // dmdb.qryOSsMesmoEnderecoOrigem.ParamByName('NUMOS').AsFloat := aNumeroOS;
-  // dmdb.qryOSsMesmoEnderecoOrigem.ParamByName('CODENDERECOORIG').AsFloat := aCodigoEnderecoOrigem;
-  // dmdb.qryOSsMesmoEnderecoOrigem.ParamByName('CODENDERECO').AsFloat := aCodigoEndereco;
-  // dmdb.qryOSsMesmoEnderecoOrigem.Open;
-
   Result := (dmdb.qryOSsMesmoEnderecoOrigem.RecordCount > 0);
 end;
 
@@ -204,9 +198,6 @@ begin
   }
 
   Result := False;
-
-
-  // dmdb.qryOSsMesmoEnderecoOrigem.Close;
 
   CriarSQLQueryMesmoEnderecoOS(aForcarUsoDeOnda);
 
@@ -425,7 +416,7 @@ function Criterio10_ProximaOSAbastecimento(aFiltro: TFiltro; aProximaOS: TProxim
 var
   tempo: TDateTime;
   ruasIgnorar, ruasSuperLotadas: string;
-  qb : TQueryBuilder;
+  qb: TQueryBuilder;
 begin
 
   ruasIgnorar := aFiltro.ruasIgnorar.DelimitedText;
@@ -451,7 +442,6 @@ begin
     Close;
     SQL.Clear;
     SQL.Add(qb.GetQuery(10, aFiltro));
-
 
     ParamByName('CODFILIAL').AsString := aFiltro.Filial;
     ParamByName('RUAINICIAL').AsFloat := aFiltro.RuaInicial;
@@ -494,7 +484,7 @@ end;
 function Criterio6_ProximaOSAbastecimentoQualquerRua(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
 var
   tempo: TDateTime;
-  qb : TQueryBuilder;
+  qb: TQueryBuilder;
 begin
 
   // Item 6
@@ -515,7 +505,7 @@ begin
     Exit;
   end;
 
-  qb :=TQueryBuilder.Create();
+  qb := TQueryBuilder.Create();
 
   with dmdb.qryAuxiliar do
   begin
@@ -568,7 +558,7 @@ function Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(aFiltro: TFiltro; aP
 var
   tipo_os: integer;
   tempo: TDateTime;
-  qb : TQueryBuilder;
+  qb: TQueryBuilder;
 begin
 
   // Item 7
@@ -672,7 +662,6 @@ begin
 
   Result := False;
   tempo := Now;
-
 
   qb := TQueryBuilder.Create;
 
@@ -904,8 +893,6 @@ begin
         SQL.Clear;
         SQL.Add(qb.GetQuery(8.2, aFiltro));
 
-       
-
         // Padrão tpEmpilhador
         tipo_os := 58;
 
@@ -1027,8 +1014,6 @@ begin
     SQL.Clear;
     SQL.Add(qb.GetQuery(11, aFiltro));
 
-   
-
     // Padrão tpEmpilhador
     tipo_os := 58;
 
@@ -1120,7 +1105,6 @@ begin
     SQL.Clear;
     SQL.Add(qb.GetQuery(9.5, aFiltro));
 
-    
     // Padrão tpEmpilhador
     tipo_os := 58;
 
@@ -1787,17 +1771,17 @@ begin
           continue;
         end;
 
-//        // Item 10 - Armazenamento comum
-//        Log('(Ordem 19) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
-//        if ProximaOSAbastecimento(filtro, proxima_os) then
-//        begin
-//
-//          Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-//            FloatToStr(Matricula));
-//          AtenderSolicitacao(filtro, proxima_os);
-//          dmdb.qryCarregarSolicitacoes.Next;
-//          continue;
-//        end;
+        // // Item 10 - Armazenamento comum
+        // Log('(Ordem 19) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
+        // if ProximaOSAbastecimento(filtro, proxima_os) then
+        // begin
+        //
+        // Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+        // FloatToStr(Matricula));
+        // AtenderSolicitacao(filtro, proxima_os);
+        // dmdb.qryCarregarSolicitacoes.Next;
+        // continue;
+        // end;
 
         // Item 11 - Abastecimento preventivo
         Log('(Ordem 21) Analisando critério 11 - Senha: ' + FloatToStr(Senha));
@@ -1811,9 +1795,8 @@ begin
           continue;
         end;
 
-
         // Item 12 - Mesmas coisas mas com galpão inteiro
-         Log('(Ordem 22) CRITÉRIO 12: A pesquisa passa a ser no armazém todo novamente');
+        Log('(Ordem 22) CRITÉRIO 12: A pesquisa passa a ser no armazém todo novamente');
         filtro.BuscarNoArmazemTodo := True;
 
         // Item 9.5 - O.S. preventiva baseadas em pedidos (Armazém todo)
@@ -2092,6 +2075,79 @@ begin
   minutos_os_reservada_262 := 0;
   percentual_separacao_liberar_palletbox_263 := 100;
   trabalha_com_palletbox_264 := False;
+
+end;
+
+{ TProcessadorCriterio }
+
+function TProcessadorCriterio.executar(codigo_criterio: double; filtro: TFiltro; proximaOS: TProximaOS): boolean;
+begin
+
+  Result := False;
+
+  if codigo_criterio = 5 then
+  begin
+
+    Result := Criterio5_ProximaOSAbastecimentoNaRua(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 6 then
+  begin
+
+    Result := Criterio6_ProximaOSAbastecimentoQualquerRua(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 6.5 then
+  begin
+
+    Result := Criterio6_5_ProximaOSPalletBox(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 7 then
+  begin
+
+    Result := Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 8 then
+  begin
+
+    Result := Criterio8_ProximaOSUltimaRua(filtro, proximaOS);
+    Exit;
+  end;
+
+
+  if codigo_criterio = 8.2 then
+  begin
+
+    Result := Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 9.5 then
+  begin
+
+    Result := Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 10 then
+  begin
+
+    Result := Criterio10_ProximaOSAbastecimento(filtro, proximaOS);
+    Exit;
+  end;
+
+  if codigo_criterio = 11 then
+  begin
+
+    Result := Criterio11_ProximaOSAbastecimentoPreventivo(filtro, proximaOS);
+    Exit;
+  end;
 
 end;
 

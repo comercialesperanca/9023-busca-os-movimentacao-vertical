@@ -99,6 +99,16 @@ object FrmInicial: TFrmInicial
         TabOrder = 5
         Transparent = True
       end
+      object btnSimulacao: TcxButton
+        Left = 166
+        Top = 370
+        Width = 243
+        Height = 40
+        Anchors = [akLeft, akBottom]
+        Caption = 'Simula'#231#227'o de consulta'
+        TabOrder = 6
+        OnClick = btnSimulacaoClick
+      end
     end
     object tabOSAtribuidas: TcxTabSheet
       BorderWidth = 5

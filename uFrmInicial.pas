@@ -60,6 +60,7 @@ type
     cxLookAndFeelController1: TcxLookAndFeelController;
     chkExibirMensagensLog: TcxCheckBox;
     chkRegistrarLogs: TcxCheckBox;
+    btnSimulacao: TcxButton;
     procedure grdOSAtrbuidasDBTableView1DblClick(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure btnLimparLogClick(Sender: TObject);
@@ -68,6 +69,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure timerTimer(Sender: TObject);
     procedure executarProcessamento();
+    procedure btnSimulacaoClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -88,7 +90,7 @@ var
 
 implementation
 
-uses ULibrary, UFRMDmdb;
+uses ULibrary, UFRMDmdb, uFrmSimulacao;
 
 {$R *.dfm}
 
@@ -121,6 +123,19 @@ begin
   btnIniciar.Enabled := true;
   chkExibirMensagensLog.Enabled := true;
   chkRegistrarLogs.Enabled := true;
+end;
+
+procedure TFrmInicial.btnSimulacaoClick(Sender: TObject);
+begin
+
+  if not Assigned(FrmSimulacao) then
+  begin
+
+    Application.CreateForm(TFrmSimulacao, FrmSimulacao);
+  end;
+
+  FrmSimulacao.ShowModal;
+
 end;
 
 procedure TFrmInicial.executarProcessamento;
