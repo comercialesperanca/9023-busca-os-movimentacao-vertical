@@ -45,12 +45,6 @@ type
     cxLabel17: TcxLabel;
     cxLabel1: TcxLabel;
     cbbCriterios: TcxComboBox;
-    cxGrid1DBTableView1: TcxGridDBTableView;
-    cxGrid1Level1: TcxGridLevel;
-    cxGrid1: TcxGrid;
-    mmQuery: TcxMemo;
-    cxLabel6: TcxLabel;
-    cxLabel18: TcxLabel;
     btnSimular: TcxButton;
     btnExplicacaoRuasIgnorar: TcxButton;
     cxLabel13: TcxLabel;
@@ -58,6 +52,8 @@ type
     cxLabel14: TcxLabel;
     cxLabel16: TcxLabel;
     btnExplicacaoRuasExcessoOS: TcxButton;
+    cxLabel18: TcxLabel;
+    mmAnalise: TcxMemo;
     procedure btnSimularClick(Sender: TObject);
     procedure btnExplicacaoRuasIgnorarClick(Sender: TObject);
     procedure btnExplicacaoRuasExcessoOSClick(Sender: TObject);
@@ -204,15 +200,12 @@ begin
     end;
   end;
 
-  qb := TQueryBuilder.Create;
-  mmQuery.Text := qb.GetQuery(criterio, filtro);
-
-  proxima_os := TProximaOS.Create(0, false);
+  proxima_os := TProximaOS.Create(0, true);
 
   pc := TProcessadorCriterio.Create;
-  sucesso := pc.executar(criterio, filtro, proxima_os);
+  sucesso := pc.executar(cbbCriterios.Text, filtro, proxima_os);
 
-  
+  mmAnalise.Text := proxima_os.AnalisesCriterios.Text;
 end;
 
 end.

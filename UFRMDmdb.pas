@@ -90,6 +90,7 @@ type
     qryConfiguracoes: TOraQuery;
     qryConfiguracoesCODIGO: TFloatField;
     qryConfiguracoesVALOR: TStringField;
+    dsrAuxiliar: TDataSource;
   private
     { Private declarations }
   public

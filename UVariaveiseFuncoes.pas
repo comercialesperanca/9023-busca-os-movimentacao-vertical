@@ -10,7 +10,7 @@ Uses
 type
   TProcessadorCriterio = class
   public
-    function executar(codigo_criterio: double; filtro: TFiltro; proximaOS: TProximaOS): boolean;
+    function executar(codigo_criterio: string; filtro: TFiltro; proximaOS: TProximaOS): boolean;
   end;
 
 type
@@ -360,6 +360,7 @@ begin
   if aFiltro.TipoOperador <> tpEmpilhador then
   begin
 
+    aProximaOS.RegistrarAnaliseCriterios('Critério 5 não será avaliado pois é destinado apenas para operadores de empilhadeira');
     Exit;
   end;
 
@@ -406,6 +407,13 @@ begin
       aProximaOS.CriterioUtilizado := 5;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close;
@@ -431,6 +439,7 @@ begin
   if aFiltro.TipoOperador <> tpEmpilhador then
   begin
 
+    aProximaOS.RegistrarAnaliseCriterios('Critério 10 não será avaliado pois é destinado apenas para operadores de empilhadeira');
     Exit;
   end;
 
@@ -475,6 +484,13 @@ begin
       aProximaOS.CriterioUtilizado := 10;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close;
@@ -496,12 +512,14 @@ begin
   if aFiltro.TipoOperador <> tpEmpilhador then
   begin
 
+    aProximaOS.RegistrarAnaliseCriterios('Critério 6 não será avaliado pois é destinado apenas para operadores de empilhadeira');
     Exit;
   end;
 
   if (aFiltro.ruasSuperLotadas.Count <= 0) then
   begin
 
+    aProximaOS.RegistrarAnaliseCriterios('Critério 6 não será avaliado pois não há ruas super lotadas de OSs');
     Exit;
   end;
 
@@ -547,6 +565,13 @@ begin
       aProximaOS.CriterioUtilizado := 6;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close;
@@ -642,6 +667,13 @@ begin
       end;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close;
@@ -710,6 +742,8 @@ begin
     if (not aFiltro.BuscarNoArmazemTodo) and ((rua_encontrada < aFiltro.RuaInicial) or (rua_encontrada > aFiltro.RuaFinal)) then
     begin
 
+      aProximaOS.RegistrarAnaliseCriterios('A rua encontrada (' + FloatToStr(rua_encontrada) + ') não está entre as ruas do filtro informado');
+
       Close();
       Result := False;
       Exit;
@@ -752,6 +786,13 @@ begin
       end;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close();
@@ -776,6 +817,7 @@ begin
   if not aFiltro.TrabalharComPalletBox then
   begin
 
+    aProximaOS.RegistrarAnaliseCriterios('Critério 6.5 não será avaliado pois trabalhar com pallet box não está habilitado');
     Exit;
   end;
 
@@ -783,6 +825,7 @@ begin
   if aFiltro.TipoOperador <> tpPaleteiro then
   begin
 
+    aProximaOS.RegistrarAnaliseCriterios('Critério 6.5 não será avaliado pois é destinado apenas para operadores de paleteira');
     Exit;
   end;
 
@@ -858,6 +901,13 @@ begin
       end;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close();
@@ -876,6 +926,7 @@ begin
 
   // Item 8.2
   Result := False;
+  aProximaOS.RegistrarAnaliseCriterios('Critério 8.2 não será avaliado pois está desabilitado');
   Log('Critério 8.2 - Desabilitado temporariamente');
   Exit;
   tempo := Now;
@@ -931,6 +982,8 @@ begin
         if (not aFiltro.BuscarNoArmazemTodo) and ((rua_encontrada < aFiltro.RuaInicial) or (rua_encontrada > aFiltro.RuaFinal)) then
         begin
 
+          aProximaOS.RegistrarAnaliseCriterios('A rua encontrada (' + FloatToStr(rua_encontrada) + ') não está entre as ruas do filtro informado');
+
           Close();
           ODACSessionGlobal.Rollback;
           Result := False;
@@ -977,6 +1030,13 @@ begin
           end;
 
           Result := True;
+        end
+        else
+        begin
+
+          aProximaOS.RegistrarAnaliseCriterios('');
+          aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+          aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
         end;
 
         Close();
@@ -1074,6 +1134,13 @@ begin
       end;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close();
@@ -1093,6 +1160,7 @@ begin
   // Critério 9.5
   Result := False;
 
+  aProximaOS.RegistrarAnaliseCriterios('Critério 9.5 não será avaliado pois está desabilitado');
   Log('O critério 9.5 foi desabilitado');
   Exit;
 
@@ -1142,6 +1210,8 @@ begin
     if (not aFiltro.BuscarNoArmazemTodo) and ((rua_encontrada < aFiltro.RuaInicial) or (rua_encontrada > aFiltro.RuaFinal)) then
     begin
 
+      aProximaOS.RegistrarAnaliseCriterios('A rua encontrada (' + FloatToStr(rua_encontrada) + ') não está entre as ruas do filtro informado');
+
       Close();
       Result := False;
       Exit;
@@ -1184,6 +1254,13 @@ begin
       end;
 
       Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
     end;
 
     Close();
@@ -2080,69 +2157,68 @@ end;
 
 { TProcessadorCriterio }
 
-function TProcessadorCriterio.executar(codigo_criterio: double; filtro: TFiltro; proximaOS: TProximaOS): boolean;
+function TProcessadorCriterio.executar(codigo_criterio: string; filtro: TFiltro; proximaOS: TProximaOS): boolean;
 begin
 
   Result := False;
 
-  if codigo_criterio = 5 then
+  if codigo_criterio = '5' then
   begin
 
     Result := Criterio5_ProximaOSAbastecimentoNaRua(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 6 then
+  if codigo_criterio = '6' then
   begin
 
     Result := Criterio6_ProximaOSAbastecimentoQualquerRua(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 6.5 then
+  if codigo_criterio = '6.5' then
   begin
 
     Result := Criterio6_5_ProximaOSPalletBox(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 7 then
+  if codigo_criterio = '7' then
   begin
 
     Result := Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 8 then
+  if codigo_criterio = '8' then
   begin
 
     Result := Criterio8_ProximaOSUltimaRua(filtro, proximaOS);
     Exit;
   end;
 
-
-  if codigo_criterio = 8.2 then
+  if codigo_criterio = '8.2' then
   begin
 
     Result := Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 9.5 then
+  if codigo_criterio = '9.5' then
   begin
 
     Result := Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 10 then
+  if codigo_criterio = '10' then
   begin
 
     Result := Criterio10_ProximaOSAbastecimento(filtro, proximaOS);
     Exit;
   end;
 
-  if codigo_criterio = 11 then
+  if codigo_criterio = '11' then
   begin
 
     Result := Criterio11_ProximaOSAbastecimentoPreventivo(filtro, proximaOS);

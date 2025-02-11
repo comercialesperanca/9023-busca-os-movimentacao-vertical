@@ -5,6 +5,8 @@ object FrmSimulacao: TFrmSimulacao
   ClientHeight = 673
   ClientWidth = 882
   Color = clWhite
+  Constraints.MinHeight = 712
+  Constraints.MinWidth = 898
   Font.Charset = ANSI_CHARSET
   Font.Color = clWindowText
   Font.Height = -13
@@ -35,6 +37,7 @@ object FrmSimulacao: TFrmSimulacao
       Properties.MaskKind = emkRegExpr
       Properties.EditMask = '\d+'
       TabOrder = 0
+      Text = '2'
       Width = 100
     end
     object spnRuaInicial: TcxSpinEdit
@@ -268,7 +271,6 @@ object FrmSimulacao: TFrmSimulacao
       Caption = 'Rodar simula'#231#227'o'
       TabOrder = 26
       OnClick = btnSimularClick
-      ExplicitTop = 307
     end
     object btnExplicacaoRuasIgnorar: TcxButton
       Left = 8
@@ -332,24 +334,13 @@ object FrmSimulacao: TFrmSimulacao
       OnClick = btnExplicacaoRuasExcessoOSClick
     end
   end
-  object cxGrid1: TcxGrid
-    Left = 469
-    Top = 488
-    Width = 405
-    Height = 177
-    Anchors = [akTop, akRight, akBottom]
-    TabOrder = 1
-    object cxGrid1DBTableView1: TcxGridDBTableView
-      Navigator.Buttons.CustomButtons = <>
-      DataController.Summary.DefaultGroupSummaryItems = <>
-      DataController.Summary.FooterSummaryItems = <>
-      DataController.Summary.SummaryGroups = <>
-    end
-    object cxGrid1Level1: TcxGridLevel
-      GridView = cxGrid1DBTableView1
-    end
+  object cxLabel18: TcxLabel
+    Left = 8
+    Top = 462
+    Caption = 'Resultado an'#225'lise'
+    Transparent = True
   end
-  object mmQuery: TcxMemo
+  object mmAnalise: TcxMemo
     Left = 8
     Top = 488
     Anchors = [akLeft, akTop, akRight, akBottom]
@@ -357,19 +348,6 @@ object FrmSimulacao: TFrmSimulacao
     Properties.ScrollBars = ssBoth
     TabOrder = 2
     Height = 177
-    Width = 455
-  end
-  object cxLabel6: TcxLabel
-    Left = 8
-    Top = 462
-    Caption = 'Query criada'
-    Transparent = True
-  end
-  object cxLabel18: TcxLabel
-    Left = 469
-    Top = 462
-    Anchors = [akTop, akRight]
-    Caption = 'Resultado'
-    Transparent = True
+    Width = 866
   end
 end

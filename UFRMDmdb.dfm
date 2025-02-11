@@ -1157,4 +1157,9 @@ object dmdb: Tdmdb
       Size = 200
     end
   end
+  object dsrAuxiliar: TDataSource
+    DataSet = qryAuxiliar
+    Left = 152
+    Top = 352
+  end
 end
