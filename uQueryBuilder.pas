@@ -212,7 +212,7 @@ begin
   Add('        , pcmovendpend.codigouma                                                        ');
   Add('        , pcmovendpend.tipoos                                                           ');
   Add(' from pcmovendpend                                                                      ');
-  Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig          ');
+  Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco              ');
   Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms      ');
   Add(' join pcest on pcest.codfilial = pcmovendpend.codfilial                                 ');
   Add('     and pcest.codprod = pcmovendpend.codprod                                           ');
@@ -599,7 +599,7 @@ begin
   Add('        , pcmovendpend.tipoos                                                                ');
 
   Add(' from pcmovendpend                                                                           ');
-  Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig               ');
+  Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco                   ');
   Add(' left join bopendenciaconf on bopendenciaconf.numos = pcmovendpend.numos                     ');
   Add(' left join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms           ');
   Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos                   ');
@@ -696,7 +696,7 @@ begin
   Add('        , pcmovendpend.codigouma                                                                     ');
   Add('        , pcmovendpend.tipoos                                                                        ');
   Add(' from pcmovendpend                                                                                   ');
-  Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codenderecoorig                       ');
+  Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco                           ');
   Add(' join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                        ');
   Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos            ');
   Add('     and booscompendencia.dataliberacao is null                                       ');

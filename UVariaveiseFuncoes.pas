@@ -2139,6 +2139,13 @@ begin
     Exit;
   end;
 
+  if codigo_criterio = '7.5' then
+  begin
+
+    Result := False;
+    Exit;
+  end;
+
   if codigo_criterio = '8' then
   begin
 
@@ -2152,6 +2159,14 @@ begin
     Result := Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proximaOS);
     Exit;
   end;
+
+  if codigo_criterio = '8.5' then
+  begin
+
+    Result := False;
+    Exit;
+  end;
+
 
   if codigo_criterio = '9.5' then
   begin
