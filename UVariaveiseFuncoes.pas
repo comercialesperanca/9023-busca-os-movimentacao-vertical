@@ -1695,8 +1695,20 @@ begin
           continue;
         end;
 
+        // Item 7 - OS de abastecimento corretivo mas com pendências
+        Log('(Ordem 9) Analisando critério 7.5 - Senha: ' + FloatToStr(Senha));
+        if processador.executar('7.5', filtro, proxima_os) then
+        begin
+
+          Log('CRITÉRIO 7.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+            FloatToStr(Matricula));
+          AtenderSolicitacao(filtro, proxima_os);
+          dmdb.qryCarregarSolicitacoes.Next;
+          continue;
+        end;
+
         // Item 8 - Pesquisando OS normalmente, sem super lotação, priorizando onda e rua que ele estava antes
-        Log('(Ordem 9) Analisando critério 8 - Senha: ' + FloatToStr(Senha));
+        Log('(Ordem 10) Analisando critério 8 - Senha: ' + FloatToStr(Senha));
         if processador.executar('8', filtro, proxima_os) then
         begin
 
@@ -1707,8 +1719,20 @@ begin
           continue;
         end;
 
+        // Item 7 - OS de abastecimento corretivo mas com pendências
+        Log('(Ordem 11) Analisando critério 8.5 - Senha: ' + FloatToStr(Senha));
+        if processador.executar('8.5', filtro, proxima_os) then
+        begin
+
+          Log('CRITÉRIO 8.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+            FloatToStr(Matricula));
+          AtenderSolicitacao(filtro, proxima_os);
+          dmdb.qryCarregarSolicitacoes.Next;
+          continue;
+        end;
+
         // Item 10 - Armazenamento comum
-        Log('(Ordem 10) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
+        Log('(Ordem 12) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
         if processador.executar('10', filtro, proxima_os) then
         begin
 
@@ -1719,48 +1743,11 @@ begin
           continue;
         end;
 
-        // Item 8.1 - Separação, processo conhecido como Pallet Box
-        // Log('Analisando critério 8.1 - Senha: ' + FloatToStr(senha));
-        // if ProximaOSPalletBox(filtro, proxima_os) then
-        // begin
-        //
-        // Log('CRITÉRIO 8.1: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua)  +  ' Funcionário - ' + FloatToStr(matricula));
-        // AtenderSolicitacao(filtro, proxima_os);
-        // dmdb.qryCarregarSolicitacoes.Next;
-        // Continue;
-        // end;
-
-        // Item 8.2 - Abastecimento preventivo sem onda
-        Log('(Ordem 11) Analisando critério 8.2 - Senha: ' + FloatToStr(Senha));
-        if processador.executar('8.2', filtro, proxima_os) then
-        begin
-
-          Log('CRITÉRIO 8.2: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-            FloatToStr(Matricula));
-          AtenderSolicitacao(filtro, proxima_os);
-          dmdb.qryCarregarSolicitacoes.Next;
-          continue;
-        end;
 
         // Item 9 - Daqui em diante, as mesmas pesquisas anteriores mas buscando o galpão todo
 
-        Log('(Ordem 12) CRITÉRIO 10 - A pesquisa passa a ser no armazém todo');
+        Log('(Ordem 13) CRITÉRIO 9 - A pesquisa passa a ser no armazém todo');
         filtro.BuscarNoArmazemTodo := True;
-
-        // Item 5 - Se o funcionário estava em uma rua super lotada, vai continuar nela até a rua sair dessa situação (Armazém todo)
-        Log('(Ordem 13) Analisando critério 5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if filtro.RuaSuperLotadaAntes then
-        begin
-          if processador.executar('5', filtro, proxima_os) then
-          begin
-
-            Log('CRITÉRIO 5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-              FloatToStr(Matricula));
-            AtenderSolicitacao(filtro, proxima_os);
-            dmdb.qryCarregarSolicitacoes.Next;
-            continue;
-          end;
-        end;
 
         // Item 6 - Verificando ruas super lotadas mas priorizando as ruas com maior quantidade de OS pendentes (Armazém todo)
         Log('(Ordem 14) Analisando critério 6 (Armazém todo) - Senha: ' + FloatToStr(Senha));
@@ -1774,24 +1761,23 @@ begin
           continue;
         end;
 
-        // Item 6.5 - Separação, processo conhecido como Pallet Box
-        Log('(Ordem 15) Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
-        if processador.executar('6.5', filtro, proxima_os) then
+        // Item 7 - OS de abastecimento corretivo mas com pendências (Armazém todo)
+        Log('(Ordem 15) Analisando critério 7 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if processador.executar('7', filtro, proxima_os) then
         begin
 
-          Log('CRITÉRIO 6.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+          Log('CRITÉRIO 7 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
             FloatToStr(Matricula));
           AtenderSolicitacao(filtro, proxima_os);
           dmdb.qryCarregarSolicitacoes.Next;
           continue;
         end;
 
-        // Item 7 - OS de abastecimento corretivo mas com pendências (Armazém todo)
-        Log('(Ordem 16) Analisando critério 7 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if processador.executar('7', filtro, proxima_os) then
+        Log('(Ordem 16) Analisando critério 7.5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        if processador.executar('7.5', filtro, proxima_os) then
         begin
 
-          Log('CRITÉRIO 7 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+          Log('CRITÉRIO 7.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
             FloatToStr(Matricula));
           AtenderSolicitacao(filtro, proxima_os);
           dmdb.qryCarregarSolicitacoes.Next;
@@ -1810,61 +1796,13 @@ begin
           continue;
         end;
 
-        // Item 8.1 - Separação, processo conhecido como Pallet Box (Armazém todo)
-        // Log('Analisando critério 8.1 (Armazém todo) - Senha: ' + FloatToStr(senha));
-        // if ProximaOSPalletBox(filtro, proxima_os) then
-        // begin
-        //
-        // Log('CRITÉRIO 8.1 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua)  +  ' Funcionário - ' + FloatToStr(matricula));
-        // AtenderSolicitacao(filtro, proxima_os);
-        // dmdb.qryCarregarSolicitacoes.Next;
-        // Continue;
-        // end;
-
-        // Item 8.2 - Abastecimento preventivo sem onda (Armazém todo)
-        Log('(Ordem 18) Analisando critério 8.2 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if processador.executar('8.2', filtro, proxima_os) then
-        begin
-
-          Log('CRITÉRIO 8.2 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-            FloatToStr(Matricula));
-          AtenderSolicitacao(filtro, proxima_os);
-          dmdb.qryCarregarSolicitacoes.Next;
-          continue;
-        end;
-
-
         // Voltando a considerar apenas as ruas que o usuário informou
 
-        Log('(Ordem 19) A pesquisa volta a ser pelo intervalo definido pelo separador');
+        Log('(Ordem 18) A pesquisa volta a ser pelo intervalo definido pelo separador');
         filtro.BuscarNoArmazemTodo := False;
 
-        // Item 9.5 - O.S. preventiva baseadas em pedidos
-        Log('(Ordem 20) Analisando critério 9.5 - Senha: ' + FloatToStr(Senha));
-        if processador.executar('9.5', filtro, proxima_os) then
-        begin
-
-          Log('CRITÉRIO 9.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-            FloatToStr(Matricula));
-          AtenderSolicitacao(filtro, proxima_os);
-          dmdb.qryCarregarSolicitacoes.Next;
-          continue;
-        end;
-
-        // // Item 10 - Armazenamento comum
-        // Log('(Ordem 19) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
-        // if ProximaOSAbastecimento(filtro, proxima_os) then
-        // begin
-        //
-        // Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
-        // FloatToStr(Matricula));
-        // AtenderSolicitacao(filtro, proxima_os);
-        // dmdb.qryCarregarSolicitacoes.Next;
-        // continue;
-        // end;
-
-        // Item 11 - Abastecimento preventivo
-        Log('(Ordem 21) Analisando critério 11 - Senha: ' + FloatToStr(Senha));
+        // Item 6.5 - Separação, processo conhecido como Pallet Box
+        Log('(Ordem 19) Analisando critério 11 - Senha: ' + FloatToStr(Senha));
         if processador.executar('11', filtro, proxima_os) then
         begin
 
@@ -1875,40 +1813,48 @@ begin
           continue;
         end;
 
-        // Item 12 - Mesmas coisas mas com galpão inteiro
-        Log('(Ordem 22) CRITÉRIO 12: A pesquisa passa a ser no armazém todo novamente');
+        Log('(Ordem 20) CRITÉRIO 12 - A pesquisa volta a ser pelo armazém todo');
         filtro.BuscarNoArmazemTodo := True;
 
-        // Item 9.5 - O.S. preventiva baseadas em pedidos (Armazém todo)
-        Log('(Ordem 23) Analisando critério 9.5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if processador.executar('9.5', filtro, proxima_os) then
+        Log('(Ordem 21) Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
+        if processador.executar('6.5', filtro, proxima_os) then
         begin
 
-          Log('CRITÉRIO 9.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+          Log('CRITÉRIO 6.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
             FloatToStr(Matricula));
           AtenderSolicitacao(filtro, proxima_os);
           dmdb.qryCarregarSolicitacoes.Next;
           continue;
         end;
 
-        // Item 10 - Armazenamento comum (Armazém todo)
-        Log('(Ordem 24) Analisando critério 10 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        Log('(Ordem 22) Analisando critério 8.5 - Senha: ' + FloatToStr(Senha));
+        if processador.executar('8.5', filtro, proxima_os) then
+        begin
+
+          Log('CRITÉRIO 8.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+            FloatToStr(Matricula));
+          AtenderSolicitacao(filtro, proxima_os);
+          dmdb.qryCarregarSolicitacoes.Next;
+          continue;
+        end;
+
+        Log('(Ordem 23) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
         if processador.executar('10', filtro, proxima_os) then
         begin
 
-          Log('CRITÉRIO 10 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+          Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
             FloatToStr(Matricula));
           AtenderSolicitacao(filtro, proxima_os);
           dmdb.qryCarregarSolicitacoes.Next;
           continue;
         end;
 
-        // Item 11 - Abastecimento preventivo (Armazém todo)
-        Log('(Ordem 25) Analisando critério 11 (Armazém todo) - Senha: ' + FloatToStr(Senha));
+        // Item 11 - Abastecimento preventivo
+        Log('(Ordem 24) Analisando critério 11 - Senha: ' + FloatToStr(Senha));
         if processador.executar('11', filtro, proxima_os) then
         begin
 
-          Log('CRITÉRIO 11 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
+          Log('CRITÉRIO 11: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
             FloatToStr(Matricula));
           AtenderSolicitacao(filtro, proxima_os);
           dmdb.qryCarregarSolicitacoes.Next;
