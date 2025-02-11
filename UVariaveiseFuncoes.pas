@@ -1503,6 +1503,7 @@ var
   percentual_separacao_finalizada: double;
   trabalhar_com_pallet_box: boolean;
   tipo_operador: TTipoOperador;
+  processador: TProcessadorCriterio;
 
 begin
 
@@ -1639,13 +1640,15 @@ begin
 
         proxima_os := TProximaOS.Create(Senha, aRegistrarAnalise);
 
+        processador := TProcessadorCriterio.Create;
+
         // Com as ruas definidas pelo usuário
 
         // Item 5 - Se o funcionário estava em uma rua super lotada, vai continuar nela até a rua sair dessa situação
         Log('(Ordem 5) Analisando critério 5 - Senha: ' + FloatToStr(Senha));
         if (filtro.RuaSuperLotadaAntes) then
         begin
-          if Criterio5_ProximaOSAbastecimentoNaRua(filtro, proxima_os) then
+          if processador.executar('5', filtro, proxima_os) then
           begin
 
             Log('CRITÉRIO 5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1658,7 +1661,7 @@ begin
 
         // Item 6 - Verificando ruas super lotadas mas priorizando as ruas com maior quantidade de OS pendentes
         Log('(Ordem 6) Analisando critério 6 - Senha: ' + FloatToStr(Senha));
-        if Criterio6_ProximaOSAbastecimentoQualquerRua(filtro, proxima_os) then
+        if processador.executar('6', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1670,7 +1673,7 @@ begin
 
         // Item 6.5 - Separação, processo conhecido como Pallet Box
         Log('(Ordem 7) Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
-        if Criterio6_5_ProximaOSPalletBox(filtro, proxima_os) then
+        if processador.executar('6.5', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1682,7 +1685,7 @@ begin
 
         // Item 7 - OS de abastecimento corretivo mas com pendências
         Log('(Ordem 8) Analisando critério 7 - Senha: ' + FloatToStr(Senha));
-        if Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(filtro, proxima_os) then
+        if processador.executar('7', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 7: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1694,7 +1697,7 @@ begin
 
         // Item 8 - Pesquisando OS normalmente, sem super lotação, priorizando onda e rua que ele estava antes
         Log('(Ordem 9) Analisando critério 8 - Senha: ' + FloatToStr(Senha));
-        if Criterio8_ProximaOSUltimaRua(filtro, proxima_os) then
+        if processador.executar('8', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1706,7 +1709,7 @@ begin
 
         // Item 10 - Armazenamento comum
         Log('(Ordem 10) Analisando critério 10 - Senha: ' + FloatToStr(Senha));
-        if Criterio10_ProximaOSAbastecimento(filtro, proxima_os) then
+        if processador.executar('10', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 10: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1729,7 +1732,7 @@ begin
 
         // Item 8.2 - Abastecimento preventivo sem onda
         Log('(Ordem 11) Analisando critério 8.2 - Senha: ' + FloatToStr(Senha));
-        if Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proxima_os) then
+        if processador.executar('8.2', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8.2: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1748,7 +1751,7 @@ begin
         Log('(Ordem 13) Analisando critério 5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
         if filtro.RuaSuperLotadaAntes then
         begin
-          if Criterio5_ProximaOSAbastecimentoNaRua(filtro, proxima_os) then
+          if processador.executar('5', filtro, proxima_os) then
           begin
 
             Log('CRITÉRIO 5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1761,7 +1764,7 @@ begin
 
         // Item 6 - Verificando ruas super lotadas mas priorizando as ruas com maior quantidade de OS pendentes (Armazém todo)
         Log('(Ordem 14) Analisando critério 6 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio6_ProximaOSAbastecimentoQualquerRua(filtro, proxima_os) then
+        if processador.executar('6', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1773,7 +1776,7 @@ begin
 
         // Item 6.5 - Separação, processo conhecido como Pallet Box
         Log('(Ordem 15) Analisando critério 6.5 - Senha: ' + FloatToStr(Senha));
-        if Criterio6_5_ProximaOSPalletBox(filtro, proxima_os) then
+        if processador.executar('6.5', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 6.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1785,7 +1788,7 @@ begin
 
         // Item 7 - OS de abastecimento corretivo mas com pendências (Armazém todo)
         Log('(Ordem 16) Analisando critério 7 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio7_ProximaOSPendenciaAbastecimentoCorretivo(filtro, proxima_os) then
+        if processador.executar('7', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 7 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1797,7 +1800,7 @@ begin
 
         // Item 8 - Pesquisando OS normalmente, sem super lotação, priorizando onda e rua que ele estava antes (Armazém todo)
         Log('(Ordem 17) Analisando critério 8 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio8_ProximaOSUltimaRua(filtro, proxima_os) then
+        if processador.executar('8', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1820,7 +1823,7 @@ begin
 
         // Item 8.2 - Abastecimento preventivo sem onda (Armazém todo)
         Log('(Ordem 18) Analisando critério 8.2 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio8_2_ProximaOSAbastecimentoPreventivoSemOnda(filtro, proxima_os) then
+        if processador.executar('8.2', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 8.2 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1838,7 +1841,7 @@ begin
 
         // Item 9.5 - O.S. preventiva baseadas em pedidos
         Log('(Ordem 20) Analisando critério 9.5 - Senha: ' + FloatToStr(Senha));
-        if Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(filtro, proxima_os) then
+        if processador.executar('9.5', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 9.5: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1862,7 +1865,7 @@ begin
 
         // Item 11 - Abastecimento preventivo
         Log('(Ordem 21) Analisando critério 11 - Senha: ' + FloatToStr(Senha));
-        if Criterio11_ProximaOSAbastecimentoPreventivo(filtro, proxima_os) then
+        if processador.executar('11', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 11: OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1878,7 +1881,7 @@ begin
 
         // Item 9.5 - O.S. preventiva baseadas em pedidos (Armazém todo)
         Log('(Ordem 23) Analisando critério 9.5 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio9_5_ProximaOSCorretivaBaseadaEmPedido(filtro, proxima_os) then
+        if processador.executar('9.5', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 9.5 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1890,7 +1893,7 @@ begin
 
         // Item 10 - Armazenamento comum (Armazém todo)
         Log('(Ordem 24) Analisando critério 10 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio10_ProximaOSAbastecimento(filtro, proxima_os) then
+        if processador.executar('10', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 10 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
@@ -1902,7 +1905,7 @@ begin
 
         // Item 11 - Abastecimento preventivo (Armazém todo)
         Log('(Ordem 25) Analisando critério 11 (Armazém todo) - Senha: ' + FloatToStr(Senha));
-        if Criterio11_ProximaOSAbastecimentoPreventivo(filtro, proxima_os) then
+        if processador.executar('11', filtro, proxima_os) then
         begin
 
           Log('CRITÉRIO 11 (Armazém todo): OS - ' + FloatToStr(proxima_os.NumeroOS) + ' RUA - ' + FloatToStr(proxima_os.Rua) + ' Funcionário - ' +
