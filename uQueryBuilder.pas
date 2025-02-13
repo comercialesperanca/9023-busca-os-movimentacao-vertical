@@ -16,13 +16,13 @@ type
     function GetQueryCriterio6(filtro: TFiltro): string;
     function GetQueryCriterio6_5(filtro: TFiltro): string;
     function GetQueryCriterio7(filtro: TFiltro): string;
+    function GetQueryCriterio7_5(filtro: TFiltro): string;
     function GetQueryCriterio8(filtro: TFiltro): string;
+    function GetQueryCriterio8_5(filtro: TFiltro): string;
     function GetQueryCriterio8_2(filtro: TFiltro): string;
     function GetQueryCriterio9_5(filtro: TFiltro): string;
     function GetQueryCriterio10(filtro: TFiltro): string;
     function GetQueryCriterio11(filtro: TFiltro): string;
-
-
 
   public
     function GetQuery(numero_criterio: double; filtro: TFiltro): string;
@@ -79,6 +79,12 @@ begin
     Result := self.GetQueryCriterio7(filtro);
   end;
 
+  if numero_criterio = 7.5 then
+  begin
+
+    Result := self.GetQueryCriterio7_5(filtro);
+  end;
+
   if numero_criterio = 8 then
   begin
 
@@ -89,6 +95,12 @@ begin
   begin
 
     Result := self.GetQueryCriterio8_2(filtro);
+  end;
+
+  if numero_criterio = 8.5 then
+  begin
+
+    Result := self.GetQueryCriterio8_5(filtro);
   end;
 
   if numero_criterio = 9.5 then
@@ -103,7 +115,7 @@ begin
     Result := self.GetQueryCriterio10(filtro);
   end;
 
-   if numero_criterio = 11 then
+  if numero_criterio = 11 then
   begin
 
     Result := self.GetQueryCriterio11(filtro);
@@ -185,13 +197,12 @@ begin
   Add(' order by pcmovendpend.data, estoque, pcest.qtgirodia desc )                          ');
   Add(' where rownum = 1                                                                     ');
 
-  Result := sList.Text;
+  Result := sList.text;
 
 end;
 
 function TQueryBuilder.GetQueryCriterio11(filtro: TFiltro): string;
 begin
-
 
   sList := TStringList.Create();
 
@@ -265,7 +276,7 @@ begin
   Add(' order by ordemrua, giro desc                                                           ');
   Add(' ) where rownum = 1                                                                     ');
 
-  Result := sList.Text;
+  Result := sList.text;
 
 end;
 
@@ -355,7 +366,7 @@ begin
   Add(' order by pcmovendpend.data, estoque, pcest.qtgirodia desc )        ');
   Add(' where rownum = 1                                                   ');
 
-  Result := sList.Text;
+  Result := sList.text;
 end;
 
 function TQueryBuilder.GetQueryCriterio6(filtro: TFiltro): string;
@@ -434,7 +445,7 @@ begin
   Add(' order by ordem1, totalrua desc, pcendereco.rua                                      ');
   Add(' ) where rownum = 1                                                                  ');
 
-  Result := sList.Text;
+  Result := sList.text;
 
 end;
 
@@ -559,7 +570,7 @@ begin
   Add('    order by dataonda, numonda, ordem_range, ordem_rua_anterior, pcendereco.rua, pcmovendpend.numos                                         ');
   Add(' ) where rownum = 1                                                                                                                         ');
 
-  Result := sList.Text;
+  Result := sList.text;
 
 end;
 
@@ -653,10 +664,93 @@ begin
   Add('             where boetiquetas.codprod = pcmovendpend.codprod     ');
   Add('             and  boetiquetas.pendente = ''S'' ))                 ');
 
-  Add(' order by dataonda, numonda, numordem                                                        ');
-  Add(' ) where rownum = 1                                                                          ');
+  Add(' order by dataonda, numonda, numordem    ');
+  Add(' ) where rownum = 1                      ');
 
-  Result := sList.Text;
+  Result := sList.text;
+
+end;
+
+function TQueryBuilder.GetQueryCriterio7_5(filtro: TFiltro): string;
+var
+  ruasIgnorar, ruasSuperLotadas: string;
+begin
+
+  ruasIgnorar := filtro.ruasIgnorar.DelimitedText;
+  ruasSuperLotadas := filtro.ruasSuperLotadas.DelimitedText;
+
+  sList := TStringList.Create();
+
+  Add(' select                                                                               ');
+  Add('   numos                                                                              ');
+  Add('   , NULL AS dataonda                                                                 ');
+  Add('   , 0 as numonda                                                                     ');
+  Add('   , 0 as numordem                                                                    ');
+  Add('   , nvl(rua, 0) as rua                                                               ');
+  Add('   , nvl(codendereco, 0) as codendereco                                               ');
+  Add('   , nvl(codenderecoorig, 0) as codenderecoorig                                       ');
+  Add('   , nvl(codigouma, 0) as codigouma                                                   ');
+  Add('   , nvl(tipoos, 0) as tipoos                                                         ');
+  Add('   , qtdpendencias                                                                    ');
+  Add(' from (                                                                               ');
+  Add(' Select pcmovendpend.numos                                                            ');
+  Add('        , ender_destino.rua                                                           ');
+  Add('        , pcmovendpend.codendereco                                                    ');
+  Add('        , pcmovendpend.codenderecoorig                                                ');
+  Add('        , count(pcmovendpend.numos) over (partition by ender_destino.rua) as totalrua ');
+  Add('        , pcmovendpend.codigouma                                                      ');
+  Add('        , pcmovendpend.tipoos                                                         ');
+  Add('        , (    SELECT                                                                 ');
+  Add('                count(movpend.codprod) AS qtd                                         ');
+  Add('            FROM booscompendencia pend                                                ');
+  Add('            JOIN pcmovendpend movpend                                                 ');
+  Add('                ON movpend.DATA >= trunc(sysdate - 30)                                ');
+  Add('                AND MOVPEND.CODFILIAL = PCMOVENDPEND.CODFILIAL                        ');
+  Add('                AND movpend.codprod = pcmovendpend.CODPROD                            ');
+  Add('            WHERE pend.DATALIBERACAO IS null                                          ');
+  Add('        ) AS qtdpendencias                                                            ');
+  Add(' from pcmovendpend                                                                    ');
+  Add(' join pcendereco ender_destino                                                        ');
+  Add('     on ender_destino.codendereco = pcmovendpend.codendereco                          ');
+  Add('     AND ender_destino.TIPOENDER = ''AP''                                             ');
+
+  if (filtro.ruasIgnorar.Count > 0) then
+  begin
+
+    Add(' -- Ruas que serão ignoradas por estarem com excesso de funcionários e do range de exceção caso a exceção não tenha sido informada explicitamente');
+    Add(' and ender_destino.rua not in (' + filtro.ruasIgnorar.DelimitedText + ' )');
+  end;
+
+  Add(' join pcendereco ender_orig                                                           ');
+  Add('     on ender_orig.codendereco = pcmovendpend.CODENDERECOORIG                         ');
+  Add('     AND ender_orig.TIPOENDER = ''AE''                                                ');
+  Add('                                                                                      ');
+
+  if filtro.TipoOperador = tpPaleteiro then
+  begin
+
+    Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a P                   ');
+    Add(' join pcmovendpend mep58 on mep58.data = pcmovendpend.data                            ');
+    Add('  and mep58.codfilial = pcmovendpend.codfilial                                        ');
+    Add('  and mep58.numtranswms = pcmovendpend.numtranswms                                    ');
+    Add('  and mep58.codigouma = pcmovendpend.codigouma                                        ');
+    Add('  and mep58.tipoos = 58                                                               ');
+    Add('  and mep58.posicao <> ''P''                                                          ');
+    Add('                                                                                      ');
+  end;
+
+  Add(' where pcmovendpend.data > sysdate - 30                                               ');
+  Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
+  Add('     and pcmovendpend.posicao = ''P''                                                 ');
+  Add('     and pcmovendpend.dtestorno is null                                               ');
+  Add('     and pcmovendpend.tipoos = :TIPOOS                                                ');
+  Add('     and pcmovendpend.codfuncos is null                                               ');
+  Add('     AND NVL(pcmovendpend.CODROTINA, 0) = 1709                                        ');
+  Add('      and ender_destino.rua between :RUAINICIAL AND :RUAFINAL                         ');
+  Add(' order by qtdpendencias, pcmovendpend.numos                                           ');
+  Add(' ) where rownum = 1                                                                   ');
+
+  Result := sList.text;
 
 end;
 
@@ -746,7 +840,7 @@ begin
 
   Add(') where rownum = 1  ');
 
-  Result := sList.Text;
+  Result := sList.text;
 
 end;
 
@@ -845,7 +939,78 @@ begin
   Add('     , ordem_range                                                                                        ');
   Add('   FOR UPDATE SKIP LOCKED                                                                                 ');
 
-  Result := sList.Text;
+  Result := sList.text;
+
+end;
+
+function TQueryBuilder.GetQueryCriterio8_5(filtro: TFiltro): string;
+var
+  ruasIgnorar, ruasSuperLotadas: string;
+begin
+
+  ruasIgnorar := filtro.ruasIgnorar.DelimitedText;
+  ruasSuperLotadas := filtro.ruasSuperLotadas.DelimitedText;
+
+  sList := TStringList.Create();
+
+  Add(' select                                                                               ');
+  Add('   numos                                                                              ');
+  Add('   , NULL AS dataonda                                                                 ');
+  Add('   , 0 as numonda                                                                     ');
+  Add('   , 0 as numordem                                                                    ');
+  Add('   , nvl(rua, 0) as rua                                                               ');
+  Add('   , nvl(codendereco, 0) as codendereco                                               ');
+  Add('   , nvl(codenderecoorig, 0) as codenderecoorig                                       ');
+  Add('   , nvl(codigouma, 0) as codigouma                                                   ');
+  Add('   , nvl(tipoos, 0) as tipoos                                                         ');
+  Add(' from (                                                                               ');
+  Add(' Select pcmovendpend.numos                                                            ');
+  Add('        , ender_destino.rua                                                           ');
+  Add('        , pcmovendpend.codendereco                                                    ');
+  Add('        , pcmovendpend.codenderecoorig                                                ');
+  Add('        , count(pcmovendpend.numos) over (partition by ender_destino.rua) as totalrua ');
+  Add('        , pcmovendpend.codigouma                                                      ');
+  Add('        , pcmovendpend.tipoos                                                         ');
+  Add(' from pcmovendpend                                                                    ');
+  Add(' join pcendereco ender_destino                                                        ');
+  Add('     on ender_destino.codendereco = pcmovendpend.codendereco                          ');
+  Add('     AND ender_destino.TIPOENDER = ''AE''                                             ');
+  Add(' join pcendereco ender_orig                                                           ');
+  Add('     on ender_orig.codendereco = pcmovendpend.codenderecoorig                         ');
+  Add('     AND ender_orig.status = ''E''                                                    ');
+
+  if (filtro.ruasIgnorar.Count > 0) then
+  begin
+
+    Add(' -- Ruas que serão ignoradas por estarem com excesso de funcionários e do range de exceção caso a exceção não tenha sido informada explicitamente');
+    Add(' and ender_destino.rua not in (' + filtro.ruasIgnorar.DelimitedText + ' )');
+  end;
+
+  if filtro.TipoOperador = tpEmpilhador then
+  begin
+
+    Add(' -- Trecho adicionado apenas quando BOFILAOS.TIPOOPERADOR igual a E                   ');
+    Add(' join pcmovendpend mep50 on mep50.data = pcmovendpend.data                            ');
+    Add('  and mep50.codfilial = pcmovendpend.codfilial                                        ');
+    Add('  and mep50.numtranswms = pcmovendpend.numtranswms                                    ');
+    Add('  and mep50.codigouma = pcmovendpend.codigouma                                        ');
+    Add('  and mep50.tipoos = 50                                                               ');
+    Add('  and mep50.posicao <> ''P''                                                          ');
+    Add('                                                                                      ');
+  end;
+
+  Add(' where pcmovendpend.data > sysdate - 30                                               ');
+  Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
+  Add('     and pcmovendpend.posicao = ''P''                                                 ');
+  Add('     and pcmovendpend.dtestorno is null                                               ');
+  Add('     and pcmovendpend.tipoos = :TIPOOS                                                ');
+  Add('     and pcmovendpend.codfuncos is null                                               ');
+  Add('     AND NVL(pcmovendpend.CODROTINA, 0) = 1709                                        ');
+  Add('      and ender_destino.rua between :RUAINICIAL AND :RUAFINAL                         ');
+  Add(' order by pcmovendpend.numos                                                          ');
+  Add(' ) where rownum = 1                                                                   ');
+
+  Result := sList.text;
 
 end;
 
@@ -928,7 +1093,7 @@ begin
   Add('     , ordem_range                                                                                          ');
   Add(' ) where rownum = 1                                                                                         ');
 
-  Result := sList.Text;
+  Result := sList.text;
 
 end;
 

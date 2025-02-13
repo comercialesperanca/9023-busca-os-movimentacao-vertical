@@ -406,6 +406,7 @@ begin
       aProximaOS.TipoServico := 'SL';
       aProximaOS.CriterioUtilizado := 5;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -483,6 +484,7 @@ begin
       aProximaOS.TipoServico := 'AC';
       aProximaOS.CriterioUtilizado := 10;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -564,6 +566,7 @@ begin
       aProximaOS.TipoServico := 'SL';
       aProximaOS.CriterioUtilizado := 6;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -666,6 +669,219 @@ begin
         end;
       end;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
+      Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
+    end;
+
+    Close;
+  end;
+
+end;
+
+function Criterio_7_5_AtribuicaoTransferenciaAbastecimento1709(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+var
+  tipo_os: integer;
+  tempo: TDateTime;
+  qb: TQueryBuilder;
+begin
+
+  {
+    Critério: 7.5
+    Nome: Atribuição de Transferência de Abastecimento 1709
+  }
+
+  Result := False;
+  tempo := Now;
+
+  qb := TQueryBuilder.Create;
+
+  with dmdb.qryAuxiliar do
+  begin
+
+    Close;
+    SQL.Clear;
+    SQL.Add(qb.GetQuery(7.5, aFiltro));
+
+    // Padrão tpEmpilhador
+    tipo_os := 58;
+
+    if aFiltro.TipoOperador = tpPaleteiro then
+    begin
+
+      tipo_os := 50;
+    end;
+
+    ParamByName('CODFILIAL').AsString := aFiltro.Filial;
+    ParamByName('RUAINICIAL').AsFloat := aFiltro.RuaInicial;
+    ParamByName('RUAFINAL').AsFloat := aFiltro.RuaFinal;
+    ParamByName('TIPOOS').AsFloat := tipo_os;
+
+    Open;
+
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 7.5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('TIPOOS: ' + FloatToStr(tipo_os));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
+
+    if (dmdb.qryAuxiliar.RecordCount > 0) then
+    begin
+
+      aProximaOS.NumeroOS := FieldByName('NUMOS').AsFloat;
+      aProximaOS.NumeroOnda := FieldByName('NUMONDA').AsFloat;
+      aProximaOS.CodigoEndereco := FieldByName('CODENDERECO').AsFloat;
+      aProximaOS.CodigoEnderecoOrigem := FieldByName('CODENDERECOORIG').AsFloat;
+      aProximaOS.NumeroUMA := FieldByName('CODIGOUMA').AsFloat;
+      aProximaOS.Rua := FieldByName('RUA').AsFloat;
+      aProximaOS.TipoOS := FieldByName('TIPOOS').AsFloat;
+      aProximaOS.TipoServico := 'AC';
+      aProximaOS.CriterioUtilizado := 7.5;
+
+      if (not FieldByName('DATAONDA').IsNull) and (FieldByName('DATAONDA').AsString <> '') then
+      begin
+
+        aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
+      end;
+
+      // processando abastecimento consolidado
+      if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
+        aFiltro.Filial, False) then
+      begin
+
+        aProximaOS.NumeroOS := 0;
+        aProximaOS.TipoServico := 'OC';
+
+        if not GravarOSsAbastecimentoConsolidado(aFiltro.Senha, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
+          aFiltro.Filial, False) then
+        begin
+
+          Result := False;
+          Exit;
+        end;
+      end;
+
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
+      Result := True;
+    end
+    else
+    begin
+
+      aProximaOS.RegistrarAnaliseCriterios('');
+      aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+      aProximaOS.RegistrarAnaliseCriterios('Nenhuma OS encontrada');
+    end;
+
+    Close;
+  end;
+
+end;
+
+function Criterio8_5_TransferenciaArmazenagemGeral1709(aFiltro: TFiltro; aProximaOS: TProximaOS): boolean;
+var
+  tipo_os: integer;
+  tempo: TDateTime;
+  qb: TQueryBuilder;
+begin
+
+  {
+    Critério: 8.5
+    Nome: Transferência de Armazenagem Geral 1709
+  }
+
+  Result := False;
+  tempo := Now;
+
+  qb := TQueryBuilder.Create;
+
+  with dmdb.qryAuxiliar do
+  begin
+
+    Close;
+    SQL.Clear;
+    SQL.Add(qb.GetQuery(8.5, aFiltro));
+
+    // Padrão tpEmpilhador
+    tipo_os := 58;
+
+    if aFiltro.TipoOperador = tpPaleteiro then
+    begin
+
+      tipo_os := 50;
+    end;
+
+    ParamByName('CODFILIAL').AsString := aFiltro.Filial;
+    ParamByName('RUAINICIAL').AsFloat := aFiltro.RuaInicial;
+    ParamByName('RUAFINAL').AsFloat := aFiltro.RuaFinal;
+    ParamByName('TIPOOS').AsFloat := tipo_os;
+
+    Open;
+
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('--------------------------------------');
+    aProximaOS.RegistrarAnaliseCriterios('Critério 8.5' + IfThen(aProximaOS.ArmazemTodo, ' - Armazém Todo', ''));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('Segundos para resposta da consulta: ' + IntToStr(SecondsBetween(tempo, Now)));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('CODFILIAL: ' + aFiltro.Filial);
+    aProximaOS.RegistrarAnaliseCriterios('RUAINICIAL: ' + FloatToStr(aFiltro.RuaInicial));
+    aProximaOS.RegistrarAnaliseCriterios('RUAFINAL: ' + FloatToStr(aFiltro.RuaFinal));
+    aProximaOS.RegistrarAnaliseCriterios('TIPOOS: ' + FloatToStr(tipo_os));
+    aProximaOS.RegistrarAnaliseCriterios('');
+    aProximaOS.RegistrarAnaliseCriterios('SQL:');
+    aProximaOS.RegistrarAnaliseCriterios(SQL.Text);
+
+    if (dmdb.qryAuxiliar.RecordCount > 0) then
+    begin
+
+      aProximaOS.NumeroOS := FieldByName('NUMOS').AsFloat;
+      aProximaOS.NumeroOnda := FieldByName('NUMONDA').AsFloat;
+      aProximaOS.CodigoEndereco := FieldByName('CODENDERECO').AsFloat;
+      aProximaOS.CodigoEnderecoOrigem := FieldByName('CODENDERECOORIG').AsFloat;
+      aProximaOS.NumeroUMA := FieldByName('CODIGOUMA').AsFloat;
+      aProximaOS.Rua := FieldByName('RUA').AsFloat;
+      aProximaOS.TipoOS := FieldByName('TIPOOS').AsFloat;
+      aProximaOS.TipoServico := 'AC';
+      aProximaOS.CriterioUtilizado := 8.5;
+
+      if (not FieldByName('DATAONDA').IsNull) and (FieldByName('DATAONDA').AsString <> '') then
+      begin
+
+        aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
+      end;
+
+      // processando abastecimento consolidado
+      if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
+        aFiltro.Filial, False) then
+      begin
+
+        aProximaOS.NumeroOS := 0;
+        aProximaOS.TipoServico := 'OC';
+
+        if not GravarOSsAbastecimentoConsolidado(aFiltro.Senha, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
+          aFiltro.Filial, False) then
+        begin
+
+          Result := False;
+          Exit;
+        end;
+      end;
+
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -785,6 +1001,7 @@ begin
         end;
       end;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -900,6 +1117,7 @@ begin
         aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
       end;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -1029,6 +1247,7 @@ begin
             end;
           end;
 
+          aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
           Result := True;
         end
         else
@@ -1133,6 +1352,7 @@ begin
         end;
       end;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -1230,11 +1450,6 @@ begin
       aProximaOS.TipoOS := FieldByName('TIPOOS').AsFloat;
       aProximaOS.CriterioUtilizado := 9.5;
 
-      // if (not FieldByName('DATAONDA').IsNull) and (FieldByName('DATAONDA').AsString <> '') then
-      // begin
-      //
-      // aProximaOS.DataOnda := FieldByName('DATAONDA').AsDateTime;
-      // end;
 
       // processando abastecimento consolidado
       if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
@@ -1253,6 +1468,7 @@ begin
         end;
       end;
 
+      aProximaOS.RegistrarAnaliseCriterios('OS encontrada: ' + FloatToStr(aProximaOS.NumeroOS));
       Result := True;
     end
     else
@@ -2142,7 +2358,7 @@ begin
   if codigo_criterio = '7.5' then
   begin
 
-    Result := False;
+    Result := Criterio_7_5_AtribuicaoTransferenciaAbastecimento1709(filtro, proximaOS);
     Exit;
   end;
 
@@ -2163,10 +2379,9 @@ begin
   if codigo_criterio = '8.5' then
   begin
 
-    Result := False;
+    Result := Criterio8_5_TransferenciaArmazenagemGeral1709(filtro, proximaOS);
     Exit;
   end;
-
 
   if codigo_criterio = '9.5' then
   begin
