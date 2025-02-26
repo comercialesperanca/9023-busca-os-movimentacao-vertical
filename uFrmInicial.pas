@@ -254,7 +254,7 @@ var
   data_limite: TDateTime;
 begin
 
-  dia := 26;
+  dia := 28;
   mes := 2;
   ano := 2025;
 
@@ -263,13 +263,13 @@ begin
   if Date > data_limite then
   begin
 
-    MsgAtencao('Versão de homologação expirada no dia 26/02/2025'  + #13 + 'A rotina será encerrada');
+    MsgAtencao('Versão de homologação expirada no dia 28/02/2025'  + #13 + 'A rotina será encerrada');
     Close;
   end
   else
   begin
 
-    MsgInformacao('Versão de homologação válida até 26/02/2025');
+    MsgInformacao('Versão de homologação válida até 28/02/2025');
   end;
 
   CONFIGURACAO_OBTIDA := False;

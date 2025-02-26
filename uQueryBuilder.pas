@@ -745,6 +745,18 @@ begin
   Add('     and pcmovendpend.dtestorno is null                                               ');
   Add('     and pcmovendpend.tipoos = :TIPOOS                                                ');
   Add('     and pcmovendpend.codfuncos is null                                               ');
+  Add('     and not exists (select bofilaos.numos                                            ');
+  Add('                              FROM bofilaos                                           ');
+  Add('                               where bofilaos.numos = pcmovendpend.numos              ');
+  Add('                               and bofilaos.status in (''E'',''R''))                  ');
+  Add(' 		and not exists (select bofilaosR.numos                                           ');
+  Add(' 		                  FROM bofilaosR                                                 ');
+  Add(' 		                  join bofilaos                                                  ');
+  Add(' 		                    on bofilaosR.senha = bofilaos.senha                          ');
+  Add(' 		                  where bofilaosR.numos = pcmovendpend.numos                     ');
+  Add(' 		                  and bofilaos.status in (''E'',''R''))                          ');
+
+
   Add('     AND NVL(pcmovendpend.CODROTINA, 0) = 1709                                        ');
   Add('      and ender_destino.rua between :RUAINICIAL AND :RUAFINAL                         ');
   Add(' order by qtdpendencias, pcmovendpend.numos                                           ');
@@ -810,20 +822,20 @@ begin
   Add(' where pcmovendpend.data > sysdate - 30                                               ');
   Add('     and pcmovendpend.codfilial = :CODFILIAL                                          ');
   Add('     and pcmovendpend.posicao = ''P''                                                 ');
-  Add('     and pcmovendpend.dtestorno is null                                                              ');
-  Add('     and pcmovendpend.tipoos = :TIPOOS                                                               ');
-  Add('     and pcmovendpend.codfuncos is null                                                              ');
-  Add('     and not exists (select bofilaos.numos                                                           ');
-  Add('                              FROM bofilaos                                                          ');
-  Add('                               where bofilaos.numos = pcmovendpend.numos                             ');
-  Add('                               and bofilaos.status in (''E'',''R''))                           ');
+  Add('     and pcmovendpend.dtestorno is null                                               ');
+  Add('     and pcmovendpend.tipoos = :TIPOOS                                                ');
+  Add('     and pcmovendpend.codfuncos is null                                               ');
+  Add('     and not exists (select bofilaos.numos                                            ');
+  Add('                              FROM bofilaos                                           ');
+  Add('                               where bofilaos.numos = pcmovendpend.numos              ');
+  Add('                               and bofilaos.status in (''E'',''R''))                  ');
 
-  Add(' 		and not exists (select bofilaosR.numos                                ');
-  Add(' 		                  FROM bofilaosR                                      ');
-  Add(' 		                  join bofilaos                                       ');
-  Add(' 		                    on bofilaosR.senha = bofilaos.senha               ');
-  Add(' 		                  where bofilaosR.numos = pcmovendpend.numos          ');
-  Add(' 		                  and bofilaos.status in (''E'',''R''))               ');
+  Add(' 		and not exists (select bofilaosR.numos                                           ');
+  Add(' 		                  FROM bofilaosR                                                 ');
+  Add(' 		                  join bofilaos                                                  ');
+  Add(' 		                    on bofilaosR.senha = bofilaos.senha                          ');
+  Add(' 		                  where bofilaosR.numos = pcmovendpend.numos                     ');
+  Add(' 		                  and bofilaos.status in (''E'',''R''))                          ');
 
   Add(' AND NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)  ');
   Add(' and booscompendencia.numos is null ');
@@ -1007,6 +1019,18 @@ begin
   Add('     and pcmovendpend.codfuncos is null                                               ');
   Add('     AND NVL(pcmovendpend.CODROTINA, 0) = 1709                                        ');
   Add('      and ender_destino.rua between :RUAINICIAL AND :RUAFINAL                         ');
+
+  Add('     and not exists (select bofilaos.numos                                            ');
+  Add('                              FROM bofilaos                                           ');
+  Add('                               where bofilaos.numos = pcmovendpend.numos              ');
+  Add('                               and bofilaos.status in (''E'',''R''))                  ');
+  Add(' 		and not exists (select bofilaosR.numos                                           ');
+  Add(' 		                  FROM bofilaosR                                                 ');
+  Add(' 		                  join bofilaos                                                  ');
+  Add(' 		                    on bofilaosR.senha = bofilaos.senha                          ');
+  Add(' 		                  where bofilaosR.numos = pcmovendpend.numos                     ');
+  Add(' 		                  and bofilaos.status in (''E'',''R''))                          ');
+
   Add(' order by pcmovendpend.numos                                                          ');
   Add(' ) where rownum = 1                                                                   ');
 

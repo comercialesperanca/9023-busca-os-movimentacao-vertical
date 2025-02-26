@@ -114,6 +114,10 @@ object FrmInicial: TFrmInicial
       BorderWidth = 5
       Caption = 'O.S. Atribu'#237'das'
       ImageIndex = 1
+      ExplicitLeft = 0
+      ExplicitTop = 0
+      ExplicitWidth = 0
+      ExplicitHeight = 0
       object grdOSAtrbuidas: TcxGrid
         Left = 0
         Top = 0
