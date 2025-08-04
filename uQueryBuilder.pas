@@ -756,7 +756,6 @@ begin
   Add(' 		                  where bofilaosR.numos = pcmovendpend.numos                     ');
   Add(' 		                  and bofilaos.status in (''E'',''R''))                          ');
 
-
   Add('     AND NVL(pcmovendpend.CODROTINA, 0) = 1709                                        ');
   Add('      and ender_destino.rua between :RUAINICIAL AND :RUAFINAL                         ');
   Add(' order by qtdpendencias, pcmovendpend.numos                                           ');
@@ -803,6 +802,7 @@ begin
   Add('        , pcmovendpend.tipoos                                                                        ');
   Add(' from pcmovendpend                                                                                   ');
   Add(' join pcendereco      on pcendereco.codendereco = pcmovendpend.codendereco                           ');
+  Add('         and pcendereco.rua between :RUAINICIAL AND :RUAFINAL                                        ');
   Add(' join bodefineondai   on bodefineondai.numtranswms = pcmovendpend.numtranswms                        ');
   Add(' left join booscompendencia on booscompendencia.numos = pcmovendpend.numos            ');
   Add('     and booscompendencia.dataliberacao is null                                       ');
@@ -838,6 +838,7 @@ begin
   Add(' 		                  and bofilaos.status in (''E'',''R''))                          ');
 
   Add(' AND NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)  ');
+
   Add(' and booscompendencia.numos is null ');
 
   if (filtro.ruasIgnorar.Count > 0) then

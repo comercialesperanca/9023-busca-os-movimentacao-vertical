@@ -156,9 +156,20 @@ begin
     SQL.Add('                 AND booscompendencia.dataliberacao is null                     ');
     SQL.Add('                 )                                                              ');
     SQL.Add('                                                                                ');
+    SQL.Add(' -- Para evitar OSs com múltiplos destinos                      ');
+    SQL.Add(' AND NOT EXISTS (                                               ');
+    SQL.Add('     SELECT 1                                                   ');
+    SQL.Add('     FROM pcmovendpend M2                                       ');
+    SQL.Add('     WHERE M2.numos = pcmovendpend.numos                        ');
+    SQL.Add('     AND (m2.codenderecoorig <> pcmovendpend.codenderecoorig    ');
+    SQL.Add('         OR m2.codendereco <> pcmovendpend.codendereco          ');
+    SQL.Add('     )                                                          ');
+    SQL.Add(' )                                                              ');
+
     SQL.Add(' AND      pcmovendpend.codenderecoorig = :CODENDERECOORIG                       ');
     SQL.Add(' AND      pcmovendpend.codendereco = :CODENDERECO                               ');
     SQL.Add(' AND      NVL(pcmovendpend.CODROTINA, 0) NOT IN (1709, 1721)                    ');
+    SQL.Add(' GROUP BY pcmovendpend.NUMOS                                                    ');
   end;
 
 end;
@@ -1449,7 +1460,6 @@ begin
       aProximaOS.NumeroUMA := FieldByName('CODIGOUMA').AsFloat;
       aProximaOS.TipoOS := FieldByName('TIPOOS').AsFloat;
       aProximaOS.CriterioUtilizado := 9.5;
-
 
       // processando abastecimento consolidado
       if ExisteOSsMesmoEnderecoOrigemEDestino(aProximaOS.NumeroOS, aProximaOS.CodigoEnderecoOrigem, aProximaOS.CodigoEndereco, aProximaOS.TipoOS,
