@@ -254,23 +254,23 @@ var
   data_limite: TDateTime;
 begin
 
-  dia := 24;
-  mes := 10;
-  ano := 2025;
-
-  data_limite := EncodeDateTime(ano, mes, dia, 0, 0, 0, 0);
-
-  if Date > data_limite then
-  begin
-
-    MsgAtencao('Versão de homologação expirada no dia 24/10/2025'  + #13 + 'A rotina será encerrada');
-    Close;
-  end
-  else
-  begin
-
-    MsgInformacao('Versão de homologação válida até 24/10/2025');
-  end;
+//  dia := 24;
+//  mes := 10;
+//  ano := 2025;
+//
+//  data_limite := EncodeDateTime(ano, mes, dia, 0, 0, 0, 0);
+//
+//  if Date > data_limite then
+//  begin
+//
+//    MsgAtencao('Versão de homologação expirada no dia 24/10/2025'  + #13 + 'A rotina será encerrada');
+//    Close;
+//  end
+//  else
+//  begin
+//
+//    MsgInformacao('Versão de homologação válida até 24/10/2025');
+//  end;
 
   CONFIGURACAO_OBTIDA := False;
   NECESSARIO_RECONECTAR_DB := False;
